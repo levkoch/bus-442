@@ -24,8 +24,7 @@
     border-radius: 4px; backdrop-filter: blur(12px); padding: 24px;
     z-index: 10; box-shadow: 0 8px 40px rgba(0,0,0,0.6);
   }
-  #controls h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.5px; margin-bottom: 4px; }
-  #controls h1 span { color: var(--accent); }
+  #controls h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-bottom: 4px; }
   .subtitle { font-size: 10px; color: var(--text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 28px; }
   .control-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text); margin-bottom: 10px; }
 
@@ -41,18 +40,13 @@
   #time-display {
     font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800;
     letter-spacing: -2px; line-height: 1; margin-bottom: 12px; text-align: center;
+    color: var(--accent);
   }
-  #time-display span { color: var(--accent); }
 
   input[type=range] { -webkit-appearance: none; width: 100%; height: 2px; background: var(--text); outline: none; cursor: pointer; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px var(--accent); }
   input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
-  .slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text); margin-top: 8px; margin-bottom: 24px; }
-
-  #stats { display: flex; gap: 12px; padding-top: 20px; border-top: 1px solid var(--border); }
-  .stat { flex: 1; text-align: center; }
-  .stat-val { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent); display: block; }
-  .stat-lbl { font-size: 8px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text); }
+  .slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text); margin-top: 8px; margin-bottom: 8px; }
 
   #legend {
     position: absolute; bottom: 24px; left: 24px; display: flex; gap: 16px;
@@ -95,7 +89,7 @@
 </div>
 
 <div id="controls">
-  <h1>Seattle <span>Transit</span></h1>
+  <h1>Seattle Transit</h1>
   <div class="subtitle">Stop Activity Viewer</div>
   <div class="control-label">Day of Week</div>
   <div id="day-selector">
@@ -108,7 +102,7 @@
     <button class="day-btn" data-day="6">Sun</button>
   </div>
   <div class="control-label">Selected Time</div>
-  <div id="time-display">07<span>:00</span></div>
+  <div id="time-display">07:00</div>
   <input type="range" id="time-slider" min="0" max="287" step="1" value="84">
   <div class="slider-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:55</span></div>
 </div>
@@ -255,7 +249,7 @@ function drawStops() {
     return p.x >= -pad && p.x <= W + pad && p.y >= -pad && p.y <= H + pad;
   });
 
-  const r = Math.max(5, Math.min(8, transform.k * 0.35));
+  const r = Math.max(3, Math.min(8, transform.k * 0.35));
 
   const circles = stopSvg.selectAll('circle').data(visible, d => d.id);
 
