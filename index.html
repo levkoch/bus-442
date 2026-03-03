@@ -45,7 +45,7 @@
   #time-display span { color: var(--accent); }
 
   input[type=range] { -webkit-appearance: none; width: 100%; height: 2px; background: var(--border); outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px rgba(232,255,71,0.5); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px var(--accent); }
   input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
   .slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); margin-top: 8px; margin-bottom: 24px; }
 
@@ -86,7 +86,7 @@
 <div id="loading">
   <div class="spinner"></div>
   <h2>Loading transit data…</h2>
-  <p id="loading-msg">Fetching stops_locations.json</p>
+  <p id="loading-msg">Fetching route information</p>
 </div>
 
 <div id="map-container">
@@ -287,10 +287,10 @@ function drawStops() {
       d3.select(this)
         .attr('cx', p.x).attr('cy', p.y)
         .attr('r', active ? r * 2 : r)
-        .attr('fill', active ? '#e8ff47' : 'rgba(80,120,200,0.6)')
-        .attr('stroke', active ? 'rgba(232,255,71,0.35)' : 'none')
-        .attr('stroke-width', active ? 6 : 0)
-        .style('filter', active ? 'drop-shadow(0 0 5px rgba(232,255,71,0.7))' : 'none');
+        .attr('fill', active ? '#FF6EC7' : '#ffffff')
+        .attr('stroke', '#000000')
+        .attr('stroke-width', 1.5)
+        .style('filter', 'none');
     });
 
   circles.exit().remove();
