@@ -321,7 +321,7 @@ function scheduleRender() {
 
 // ── Zoom ──────────────────────────────────────────────────────────────────────
 const zoomBehavior = d3.zoom()
-  .scaleExtent([0.7, 32])
+  .scaleExtent([0.7, 18])
   .on('zoom', (event) => {
     transform = event.transform;
     scheduleRender();
