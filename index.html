@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seattle Transit — Live Stop Viewer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --panel: #11141a;
+    --border: #1e2330;
+    --accent: #e8ff47;
+    --accent2: #ff5f3e;
+    --text: #c8d0e0;
+    --muted: #4a5268;
+    --active: #e8ff47;
+    --stop-base: rgba(80, 120, 200, 0.55);
+    --stop-active: #e8ff47;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow: hidden;
+  }
+
+  #map-container {
+    position: absolute;
+    inset: 0;
+  }
+
+  #map-svg {
+    width: 100%; height: 100%;
+  }
+
+  /* Tile layer */
+  .tile image { pointer-events: none; }
+
+  /* Controls panel */
+  #controls {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 300px;
+    background: rgba(11, 14, 20, 0.92);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    backdrop-filter: blur(12px);
+    padding: 24px;
+    z-index: 10;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+
+  #controls h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  #controls h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+  }
+
+  .control-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  /* Day selector */
+  #day-selector {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 28px;
+  }
+
+  .day-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    padding: 7px 0;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .day-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .day-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+    font-weight: 500;
+  }
+
+  /* Time display */
+  #time-display {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  #time-display span { color: var(--accent); }
+
+  /* Slider */
+  #time-slider-wrap {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(232, 255, 71, 0.5);
+  }
+
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    border: none;
+  }
+
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  /* Stats bar */
+  #stats {
+    display: flex;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat {
+    flex: 1;
+    text-align: center;
+  }
+
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-lbl {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+  }
+
+  /* Legend */
+  #legend {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    display: flex;
+    gap: 16px;
+    background: rgba(11,14,20,0.85);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-size: 10px;
+    color: var(--muted);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Tooltip */
+  #tooltip {
+    position: absolute;
+    background: rgba(11,14,20,0.96);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 11px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 20;
+    max-width: 220px;
+    transition: opacity 0.1s;
+  }
+
+  #tooltip .tt-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  #tooltip .tt-routes { color: var(--muted); font-size: 10px; margin-bottom: 6px; }
+
+  #tooltip .tt-times {
+    color: var(--accent);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  /* Loading */
+  #loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    z-index: 100;
+    gap: 12px;
+  }
+
+  #loading h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  #loading p { font-size: 11px; color: var(--muted); }
+
+  .spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Stop circles */
+  .stop-dot {
+    transition: r 0.2s, fill 0.2s, filter 0.2s;
+    cursor: pointer;
+  }
+
+  .stop-dot.incoming {
+    filter: drop-shadow(0 0 6px rgba(232, 255, 71, 0.8));
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <h2>Loading transit data…</h2>
+  <p id="loading-msg">Reading stops_locations.json</p>
+</div>
+
+<div id="map-container">
+  <svg id="map-svg">
+    <g id="tiles"></g>
+    <g id="stops-layer"></g>
+  </svg>
+</div>
+
+<div id="controls">
+  <h1>Seattle <span>Transit</span></h1>
+  <div class="subtitle">Stop Activity Viewer</div>
+
+  <div class="control-label">Day of Week</div>
+  <div id="day-selector">
+    <button class="day-btn" data-day="0">Mon</button>
+    <button class="day-btn" data-day="1">Tue</button>
+    <button class="day-btn" data-day="2">Wed</button>
+    <button class="day-btn" data-day="3">Thu</button>
+    <button class="day-btn" data-day="4">Fri</button>
+    <button class="day-btn" data-day="5">Sat</button>
+    <button class="day-btn" data-day="6">Sun</button>
+  </div>
+
+  <div class="control-label">Selected Time</div>
+  <div id="time-display">--<span>:--</span></div>
+  <div id="time-slider-wrap">
+    <input type="range" id="time-slider" min="0" max="287" step="1" value="84">
+    <div class="slider-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:55</span></div>
+  </div>
+
+  <div id="stats">
+    <div class="stat">
+      <span class="stat-val" id="stat-active">—</span>
+      <span class="stat-lbl">Active Stops</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="stat-total">—</span>
+      <span class="stat-lbl">Total Stops</span>
+    </div>
+    <div class="stat">
+      <span class="stat-val" id="stat-arrivals">—</span>
+      <span class="stat-lbl">Arrivals Soon</span>
+    </div>
+  </div>
+</div>
+
+<div id="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background: rgba(80,120,200,0.7)"></div>
+    <span>Bus stop</span>
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background: #e8ff47; box-shadow: 0 0 6px rgba(232,255,71,0.8)"></div>
+    <span>Arriving within 5 min</span>
+  </div>
+</div>
+
+<div id="tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-routes" id="tt-routes"></div>
+  <div class="tt-times" id="tt-times"></div>
+</div>
+
+<script>
+// ── Tile helpers ────────────────────────────────────────────────────────────
+const TILE_SIZE = 256;
+
+function mercatorProject(lat, lon, zoom) {
+  const scale = TILE_SIZE * Math.pow(2, zoom);
+  const x = (lon + 180) / 360 * scale;
+  const sinLat = Math.sin(lat * Math.PI / 180);
+  const y = (0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * scale;
+  return { x, y };
+}
+
+function tileToLatLon(tx, ty, zoom) {
+  const n = Math.pow(2, zoom);
+  const lon = tx / n * 360 - 180;
+  const latRad = Math.atan(Math.sinh(Math.PI * (1 - 2 * ty / n)));
+  return { lat: latRad * 180 / Math.PI, lon };
+}
+
+// ── State ───────────────────────────────────────────────────────────────────
+let stopsData = null;
+let selectedDay = 1; // Tuesday default (good weekday coverage)
+let sliderVal = 84;  // ~7:00 AM default
+let transform = d3.zoomIdentity;
+let currentZoom = 12;
+
+// Seattle center
+const CENTER_LAT = 47.608;
+const CENTER_LON = -122.335;
+
+// ── Time utilities ──────────────────────────────────────────────────────────
+function sliderToMinutes(v) { return v * 5; }
+
+function minutesToStr(m) {
+  const h = Math.floor(m / 60) % 24;
+  const min = m % 60;
+  return `${String(h).padStart(2,'0')}:${String(min).padStart(2,'0')}`;
+}
+
+function timeStrToMinutes(t) {
+  if (!t) return -1;
+  const parts = t.split(':');
+  return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+}
+
+// ── Render time display ─────────────────────────────────────────────────────
+function updateTimeDisplay() {
+  const mins = sliderToMinutes(sliderVal);
+  const h = String(Math.floor(mins / 60) % 24).padStart(2,'0');
+  const m = String(mins % 60).padStart(2,'0');
+  document.getElementById('time-display').innerHTML = `${h}<span>:${m}</span>`;
+}
+
+// ── Map setup ───────────────────────────────────────────────────────────────
+const svg = d3.select('#map-svg');
+const tilesG = svg.select('#tiles');
+const stopsG = svg.select('#stops-layer');
+const tooltip = document.getElementById('tooltip');
+
+let width = window.innerWidth;
+let height = window.innerHeight;
+
+function getMapDimensions() {
+  width = window.innerWidth;
+  height = window.innerHeight;
+  svg.attr('width', width).attr('height', height);
+}
+getMapDimensions();
+
+// Compute initial pixel offset so Seattle is centered
+function getInitialTranslate(zoom) {
+  const center = mercatorProject(CENTER_LAT, CENTER_LON, zoom);
+  return { x: width / 2 - center.x, y: height / 2 - center.y };
+}
+
+let initT = getInitialTranslate(currentZoom);
+transform = d3.zoomIdentity.translate(initT.x, initT.y);
+
+// Zoom behaviour
+const zoom = d3.zoom()
+  .scaleExtent([0.5, 64])
+  .on('zoom', (event) => {
+    transform = event.transform;
+    renderTiles();
+    renderStops();
+  });
+
+svg.call(zoom).call(zoom.transform, transform);
+
+// ── Tile rendering ──────────────────────────────────────────────────────────
+function renderTiles() {
+  // Compute effective zoom level
+  const k = transform.k;
+  const tileZoom = Math.min(19, Math.max(0, Math.round(Math.log2(k) + currentZoom)));
+
+  const tileScale = TILE_SIZE * Math.pow(2, tileZoom);
+
+  // Visible tile range
+  const x0 = Math.floor((-transform.x) / (TILE_SIZE * k));
+  const y0 = Math.floor((-transform.y) / (TILE_SIZE * k));
+  const x1 = Math.ceil((-transform.x + width) / (TILE_SIZE * k));
+  const y1 = Math.ceil((-transform.y + height) / (TILE_SIZE * k));
+
+  const tiles = [];
+  const n = Math.pow(2, tileZoom);
+  for (let tx = x0; tx <= x1; tx++) {
+    for (let ty = y0; ty <= y1; ty++) {
+      if (ty < 0 || ty >= n) continue;
+      const txx = ((tx % n) + n) % n;
+      tiles.push({ tx, ty, txx, tileZoom });
+    }
+  }
+
+  // Pixel position for a tile
+  function tilePixel(tx, ty, z) {
+    const center = mercatorProject(CENTER_LAT, CENTER_LON, currentZoom);
+    const tileOrigin = mercatorProject(tileToLatLon(tx, ty, z).lat, tileToLatLon(tx, ty, z).lon, currentZoom);
+    const px = transform.x + tileOrigin.x;
+    const py = transform.y + tileOrigin.y;
+    return { px, py };
+  }
+
+  // Simpler: map tile top-left directly
+  function tilePx(tx, ty, z) {
+    const tileWorldX = tx * TILE_SIZE * Math.pow(2, currentZoom - z);
+    const tileWorldY = ty * TILE_SIZE * Math.pow(2, currentZoom - z);
+    return {
+      px: transform.x + tileWorldX * transform.k / Math.pow(2, currentZoom),
+      py: transform.y + tileWorldY * transform.k / Math.pow(2, currentZoom)
+    };
+  }
+
+  const tileSize = TILE_SIZE * transform.k / Math.pow(2, tileZoom - currentZoom);
+
+  const sel = tilesG.selectAll('image').data(tiles, d => `${d.tileZoom}/${d.txx}/${d.ty}`);
+
+  sel.enter().append('image')
+    .attr('xlink:href', d => `https://tile.openstreetmap.org/${d.tileZoom}/${d.txx}/${d.ty}.png`)
+    .attr('width', tileSize + 1)
+    .attr('height', tileSize + 1)
+    .merge(sel)
+    .attr('x', d => tilePx(d.tx, d.ty, d.tileZoom).px)
+    .attr('y', d => tilePx(d.tx, d.ty, d.tileZoom).py)
+    .attr('width', tileSize + 1)
+    .attr('height', tileSize + 1);
+
+  sel.exit().remove();
+}
+
+// ── Project lat/lon to screen px ────────────────────────────────────────────
+function project(lat, lon) {
+  const p = mercatorProject(lat, lon, currentZoom);
+  return {
+    x: transform.x + p.x * transform.k,
+    y: transform.y + p.y * transform.k
+  };
+}
+
+// ── Stop rendering ──────────────────────────────────────────────────────────
+function getIncomingTimes(stop) {
+  const dayStr = String(selectedDay);
+  const currentMin = sliderToMinutes(sliderVal);
+  const windowEnd = currentMin + 5;
+  const arrivals = [];
+
+  for (const [routeId, route] of Object.entries(stop.routes)) {
+    const times = route.trips?.[dayStr] || [];
+    for (const t of times) {
+      const m = timeStrToMinutes(t);
+      if (m >= currentMin && m <= windowEnd) {
+        arrivals.push({ time: t, route: route.short_name });
+      }
+    }
+  }
+  return arrivals;
+}
+
+function renderStops() {
+  if (!stopsData) return;
+
+  const entries = Object.entries(stopsData);
+  const currentMin = sliderToMinutes(sliderVal);
+  const dayStr = String(selectedDay);
+
+  // Only show stops that have service on selected day
+  const visible = entries.filter(([id, stop]) =>
+    Object.values(stop.routes).some(r => r.trips?.[dayStr]?.length > 0)
+  );
+
+  const dots = stopsG.selectAll('.stop-dot').data(visible, d => d[0]);
+
+  dots.enter().append('circle')
+    .attr('class', 'stop-dot')
+    .attr('r', 3)
+    .on('mousemove', function(event, d) {
+      const [id, stop] = d;
+      const incoming = getIncomingTimes(stop);
+      const routes = Object.values(stop.routes).map(r => r.short_name).join(', ');
+
+      document.getElementById('tt-name').textContent = stop.name;
+      document.getElementById('tt-routes').textContent = `Routes: ${routes}`;
+      document.getElementById('tt-times').innerHTML = incoming.length
+        ? incoming.map(a => `⬤ Route ${a.route} — ${a.time}`).join('<br>')
+        : '<span style="color:#4a5268">No arrivals in next 5 min</span>';
+
+      tooltip.style.opacity = 1;
+      tooltip.style.left = (event.pageX + 14) + 'px';
+      tooltip.style.top  = (event.pageY - 10) + 'px';
+    })
+    .on('mouseleave', function() {
+      tooltip.style.opacity = 0;
+    })
+    .merge(dots)
+    .each(function(d) {
+      const [id, stop] = d;
+      const pos = project(stop.lat, stop.lon);
+      const incoming = getIncomingTimes(stop);
+      const isActive = incoming.length > 0;
+      const k = transform.k;
+      const baseR = Math.max(2, Math.min(5, k * 0.4));
+
+      d3.select(this)
+        .attr('cx', pos.x)
+        .attr('cy', pos.y)
+        .attr('r', isActive ? baseR * 1.8 : baseR)
+        .attr('fill', isActive ? 'var(--accent)' : 'rgba(80,120,200,0.55)')
+        .attr('stroke', isActive ? 'rgba(232,255,71,0.4)' : 'none')
+        .attr('stroke-width', isActive ? 4 : 0)
+        .classed('incoming', isActive);
+    });
+
+  dots.exit().remove();
+
+  // Update stats
+  const totalActive = visible.filter(([id, stop]) => getIncomingTimes(stop).length > 0).length;
+  const totalArrivals = visible.reduce((sum, [id, stop]) => sum + getIncomingTimes(stop).length, 0);
+
+  document.getElementById('stat-active').textContent = totalActive.toLocaleString();
+  document.getElementById('stat-total').textContent = visible.length.toLocaleString();
+  document.getElementById('stat-arrivals').textContent = totalArrivals.toLocaleString();
+}
+
+// ── Event listeners ─────────────────────────────────────────────────────────
+document.querySelectorAll('.day-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedDay = parseInt(btn.dataset.day);
+    renderStops();
+  });
+});
+
+// Set default active day
+document.querySelector('[data-day="1"]').classList.add('active');
+
+document.getElementById('time-slider').addEventListener('input', function() {
+  sliderVal = parseInt(this.value);
+  updateTimeDisplay();
+  renderStops();
+});
+
+window.addEventListener('resize', () => {
+  getMapDimensions();
+  renderTiles();
+  renderStops();
+});
+
+// ── Load data ───────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    document.getElementById('loading-msg').textContent = 'Fetching stops_locations.json…';
+    const resp = await fetch('stops_locations.json');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    document.getElementById('loading-msg').textContent = 'Parsing data…';
+    stopsData = await resp.json();
+
+    document.getElementById('loading').style.display = 'none';
+    updateTimeDisplay();
+    renderTiles();
+    renderStops();
+  } catch (e) {
+    document.getElementById('loading-msg').textContent = `Error: ${e.message}`;
+    document.querySelector('#loading h2').textContent = 'Failed to load data';
+    document.querySelector('.spinner').style.borderTopColor = '#ff5f3e';
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
