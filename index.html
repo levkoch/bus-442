@@ -271,7 +271,7 @@ function drawStops() {
       document.getElementById('tt-name').textContent = d.name;
       document.getElementById('tt-routes').textContent = `Routes: ${routes}`;
       document.getElementById('tt-times').innerHTML = incoming.length
-        ? incoming.map(a => `⬤ Route ${a.route} — ${a.time}`).join('<br>')
+        ? incoming.map(a => `Route ${a.route} — ${a.time}`).join('<br>')
         : '<span style="color:#4a5268">No arrivals in next 5 min</span>';
       const tip = document.getElementById('tooltip');
       tip.style.opacity = 1;
@@ -321,7 +321,7 @@ function scheduleRender() {
 
 // ── Zoom ──────────────────────────────────────────────────────────────────────
 const zoomBehavior = d3.zoom()
-  .scaleExtent([0.7, 18])
+  .scaleExtent([1, 10])
   .on('zoom', (event) => {
     transform = event.transform;
     scheduleRender();
