@@ -260,7 +260,7 @@ function drawStops() {
     return p.x >= -pad && p.x <= W + pad && p.y >= -pad && p.y <= H + pad;
   });
 
-  const r = Math.max(2.5, Math.min(5, transform.k * 0.35));
+  const r = Math.max(5, Math.min(8, transform.k * 0.35));
 
   const circles = stopSvg.selectAll('circle').data(visible, d => d.id);
 
@@ -286,7 +286,7 @@ function drawStops() {
       const active = incoming.length > 0;
       d3.select(this)
         .attr('cx', p.x).attr('cy', p.y)
-        .attr('r', active ? r * 2 : r)
+        .attr('r', r)
         .attr('fill', active ? '#FF6EC7' : '#ffffff')
         .attr('stroke', '#000000')
         .attr('stroke-width', 1.5)
