@@ -269,6 +269,7 @@
   #tooltip .tt-name { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
   #tooltip .tt-routes { color: var(--text-map); font-size: 10px; margin-bottom: 6px; }
   #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
+  #tooltip .tt-times.no-arrivals { color: var(--text-map); }
 </style>
 </head>
 <body>
@@ -492,7 +493,7 @@ function drawStops() {
       document.getElementById('tt-routes').textContent = `Routes: ${routes}`;
       document.getElementById('tt-times').innerHTML = incoming.length
         ? incoming.map(a => `Route ${a.route} — ${a.time}`).join('<br>')
-        : '<span>No arrivals in next 5 min</span>';
+        : '<span class="no-arrivals">No arrivals in next 5 min</span>';
       const tip = document.getElementById('tooltip');
       tip.style.opacity = 1;
       tip.style.left = (event.clientX + 14) + 'px';
