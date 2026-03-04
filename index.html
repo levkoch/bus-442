@@ -299,7 +299,7 @@
           <span class="control-label">Day</span>
           <div id="day-selector">
             <button class="day-btn" data-day="0">Mon</button>
-            <button class="day-btn active" data-day="1">Tue</button>
+            <button class="day-btn" data-day="1">Tue</button>
             <button class="day-btn" data-day="2">Wed</button>
             <button class="day-btn" data-day="3">Thu</button>
             <button class="day-btn" data-day="4">Fri</button>
@@ -436,8 +436,13 @@ function drawTiles() {
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let stopList = [];
-let selectedDay = 1;
-let sliderVal = 84;
+
+// initalize to current day of the week + time
+const _now = new Date();
+let selectedDay = _now.getDay() === 0 ? 6 : _now.getDay() - 1;
+const _nowMins = _now.getHours() * 60 + _now.getMinutes();
+let sliderVal = Math.round(_nowMins / 5); 
+document.querySelector(`.day-btn[data-day="${selectedDay}"]`).classList.add('active');
 
 function sliderToMinutes(v) { return v * 5; }
 function timeStrToMinutes(t) {
