@@ -229,13 +229,13 @@
     flex-shrink: 0;
   }
   .legend-item { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-map); opacity: 0.7; }
-  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
   /* ── Map viewport ── */
   #map-container {
     position: relative;
     width: 100%;
-    height: 520px;
+    height: 720px;
     overflow: hidden;
   }
 
@@ -322,7 +322,7 @@
 
         <div class="legend-inline">
           <div class="legend-item"><div class="legend-dot" style="background:#fff;border:1px solid #555"></div><span>Stop</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#FF6EC7"></div><span>Arriving &lt;5 min</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#FF6EC7"></div><span>Arrival in next 5 minutes</span></div>
         </div>
       </div>
 
@@ -337,7 +337,7 @@
       </div>
     </div>
 
-    <div class="viz-caption">Fig. 1 — King County Metro · Stop Arrivals</div>
+    <div class="viz-caption">Fig. 1 — King County Metro Stop Arrivals</div>
   </div>
   <!-- ── End visualization ────────────────────────────── -->
 
