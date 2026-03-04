@@ -311,7 +311,7 @@
 
         <div class="ctrl-group">
           <span class="control-label">Time</span>
-          <div id="time-display">07:00</div>
+          <div id="time-display">00:00</div>
           <div class="slider-wrap">
             <span class="slider-edge">00:00</span>
             <input type="range" id="time-slider" min="0" max="287" step="1" value="84">
@@ -526,7 +526,7 @@ function scheduleRender() {
 
 // ── Zoom — attach to map-container only ──────────────────────────────────────
 const zoomBehavior = d3.zoom()
-  .scaleExtent([1, 10])
+  .scaleExtent([3, 16])
   .on('zoom', (event) => { transform = event.transform; scheduleRender(); });
 
 d3.select('#map-container')
