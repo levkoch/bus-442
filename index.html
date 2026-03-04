@@ -3,113 +3,355 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seattle Transit — Live Stop Viewer</title>
+<title>How Seattle Moves — A Transit Story</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
   :root {
-    --bg: #0a0c10; --panel: #11141a; --border: #1e2330;
-    --accent: #FF6EC7; --text: #c8d0e0;
+    --bg: #f5f0e8;
+    --ink: #1a1610;
+    --muted: #7a7060;
+    --rule: #d4cbbf;
+    --accent: #FF6EC7;
+    --map-bg: #0a0c10;
+    --border: #1e2330;
+    --text-map: #c8d0e0;
   }
-  html, body { width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; overflow: hidden; }
-  #map-container { position: absolute; inset: 0; }
-  #tile-canvas { position: absolute; inset: 0; }
-  #stop-svg { position: absolute; inset: 0; pointer-events: none; }
-  #stop-svg circle { pointer-events: all; }
 
+  html { background: var(--bg); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
+  body { min-height: 100vh; }
+
+  /* ── Article layout ── */
+  .article-wrap {
+    max-width: 100%;
+    padding: 60px 20px 100px;
+  }
+
+  .article-text {
+    max-width: 60%;
+    margin: 0 auto;
+  }
+
+  /* ── Typography ── */
+  .article-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  h1.article-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -1px;
+    color: var(--ink);
+    margin-bottom: 28px;
+  }
+
+  h1.article-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .article-byline {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 40px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .article-body p {
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.8;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .article-body p:first-child::first-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 700;
+    float: left;
+    line-height: 0.8;
+    margin-right: 8px;
+    margin-top: 8px;
+    color: var(--accent);
+  }
+
+  .article-body p strong {
+    font-weight: 400;
+    color: var(--ink);
+    border-bottom: 1px solid var(--accent);
+  }
+
+  hr.section-rule {
+    border: none;
+    border-top: 1px solid var(--rule);
+    margin: 40px 0;
+  }
+
+  /* ── Visualization block ── */
+  .viz-block {
+    max-width: 90%;
+    margin: 56px auto;
+  }
+
+  .viz-caption {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .viz-shell {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+    background: var(--map-bg);
+  }
+
+  /* ── Controls bar ── */
   #controls {
-    position: absolute; top: 24px; left: 24px; width: 300px;
-    background: rgba(11,14,20,0.93); border: 1px solid var(--border);
-    border-radius: 4px; backdrop-filter: blur(12px); padding: 24px;
-    z-index: 10; box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    background: rgba(11,14,20,0.97);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
   }
-  #controls h1 { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-bottom: 4px; }
-  .subtitle { font-size: 10px; color: var(--text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 28px; }
-  .control-label { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text); margin-bottom: 10px; }
 
-  #day-selector { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 28px; }
+  .ctrl-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .control-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-map);
+    white-space: nowrap;
+    opacity: 0.6;
+  }
+
+  #day-selector {
+    display: flex;
+    gap: 3px;
+  }
+
   .day-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--text);
-    font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase;
-    padding: 7px 0; cursor: pointer; border-radius: 2px; transition: all 0.15s; text-align: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-map);
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    padding: 5px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
   }
   .day-btn:hover { border-color: var(--accent); color: var(--accent); }
   .day-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 500; }
 
+  .ctrl-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
   #time-display {
-    font-family: 'Syne', sans-serif; font-size: 42px; font-weight: 800;
-    letter-spacing: -2px; line-height: 1; margin-bottom: 12px; text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
     color: var(--accent);
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    min-width: 56px;
   }
 
-  input[type=range] { -webkit-appearance: none; width: 100%; height: 2px; background: var(--text); outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px var(--accent); }
-  input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
-  .slider-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text); margin-top: 8px; margin-bottom: 8px; }
-
-  #legend {
-    position: absolute; bottom: 24px; left: 24px; display: flex; gap: 16px;
-    background: rgba(11,14,20,0.85); border: 1px solid var(--border); border-radius: 4px;
-    padding: 10px 16px; font-size: 10px; color: var(--text); backdrop-filter: blur(8px); z-index: 10;
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 160px;
   }
-  .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-  #tooltip {
-    position: absolute; background: rgba(11,14,20,0.96); border: 1px solid var(--border);
-    border-radius: 4px; padding: 10px 14px; font-size: 11px; pointer-events: none;
-    opacity: 0; z-index: 20; max-width: 220px; transition: opacity 0.1s;
+  .slider-edge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--text-map);
+    opacity: 0.4;
+    white-space: nowrap;
   }
-  #tooltip .tt-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  #tooltip .tt-routes { color: var(--text); font-size: 10px; margin-bottom: 6px; }
-  #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
 
+  input[type=range] {
+    appearance: none; -webkit-appearance: none;
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--accent); cursor: pointer;
+    box-shadow: 0 0 8px var(--accent);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--accent); cursor: pointer; border: none;
+  }
+
+  .legend-inline {
+    display: flex;
+    gap: 14px;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-map); opacity: 0.7; }
+  .legend-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Map viewport ── */
+  #map-container {
+    position: relative;
+    width: 100%;
+    height: 520px;
+    overflow: hidden;
+  }
+
+  #tile-canvas { position: absolute; inset: 0; }
+  #stop-svg { position: absolute; inset: 0; pointer-events: none; }
+  #stop-svg circle { pointer-events: all; }
+
+  /* ── Loading overlay ── */
   #loading {
     position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; background: var(--bg); z-index: 100; gap: 12px;
+    align-items: center; justify-content: center; background: var(--map-bg); z-index: 100; gap: 12px;
   }
-  #loading h2 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; color: #fff; }
-  #loading p { font-size: 11px; color: var(--text); }
-  .spinner { width: 32px; height: 32px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  #loading h2 { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: #fff; letter-spacing: 1px; }
+  #loading p { font-size: 11px; color: var(--text-map); font-family: 'DM Mono', monospace; opacity: 0.5; }
+  .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Tooltip ── */
+  #tooltip {
+    position: fixed;
+    background: rgba(11,14,20,0.97);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 11px;
+    pointer-events: none;
+    opacity: 0;
+    z-index: 1000;
+    max-width: 220px;
+    transition: opacity 0.1s;
+    font-family: 'DM Mono', monospace;
+  }
+  #tooltip .tt-name { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  #tooltip .tt-routes { color: var(--text-map); font-size: 10px; margin-bottom: 6px; opacity: 0.6; }
+  #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
 </style>
 </head>
 <body>
 
-<div id="loading">
-  <div class="spinner"></div>
-  <h2>Loading transit data…</h2>
-  <p id="loading-msg">Fetching route information</p>
-</div>
+<div class="article-wrap">
+  <div class="article-text">
+    <div class="article-label">Transportation Infrastructure</div>
+    <h1 class="article-title">The Bus Curse:<br><em>Investigating King County Bus Lateness</em></h1>
+    <div class="article-byline">By Lev Kochergin & Sonya Outhred &nbsp;·&nbsp; March 2026 &nbsp;</div>
 
-<div id="map-container">
-  <canvas id="tile-canvas"></canvas>
-  <svg id="stop-svg"></svg>
-</div>
+    <div class="article-body">
+      <p>Every commuter student at UW can relate to the bus curse: it seems that regardless of when you arrive to the bus stop, the universe will force you to wait ten minutes before you get picked up to your desination. Sound Transit bus routes intend to provide an effective system to funnel the 4.15 million Seattle metro area residents to their desinations. We explored showing which bus routes are active throuout the week.</p>
 
-<div id="controls">
-  <h1>Seattle Transit</h1>
-  <div class="subtitle">Stop Activity Viewer</div>
-  <div class="control-label">Day of Week</div>
-  <div id="day-selector">
-    <button class="day-btn" data-day="0">Mon</button>
-    <button class="day-btn active" data-day="1">Tue</button>
-    <button class="day-btn" data-day="2">Wed</button>
-    <button class="day-btn" data-day="3">Thu</button>
-    <button class="day-btn" data-day="4">Fri</button>
-    <button class="day-btn" data-day="5">Sat</button>
-    <button class="day-btn" data-day="6">Sun</button>
+      <p>Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap. Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap.</p>
+
+      <p>Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap. Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap.</p>
+    </div>
   </div>
-  <div class="control-label">Selected Time</div>
-  <div id="time-display">07:00</div>
-  <input type="range" id="time-slider" min="0" max="287" step="1" value="84">
-  <div class="slider-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:55</span></div>
-</div>
 
-<div id="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:rgba(80,120,200,0.7)"></div><span>Bus stop</span></div>
-  <div class="legend-item"><div class="legend-dot" style="background:#e8ff47;box-shadow:0 0 6px rgba(232,255,71,0.8)"></div><span>Arriving within 5 min</span></div>
+  <!-- ── Visualization ────────────────────────────────── -->
+  <div class="viz-block">
+    <div class="viz-shell">
+
+      <div id="controls">
+        <div class="ctrl-group">
+          <span class="control-label">Day</span>
+          <div id="day-selector">
+            <button class="day-btn" data-day="0">Mon</button>
+            <button class="day-btn active" data-day="1">Tue</button>
+            <button class="day-btn" data-day="2">Wed</button>
+            <button class="day-btn" data-day="3">Thu</button>
+            <button class="day-btn" data-day="4">Fri</button>
+            <button class="day-btn" data-day="5">Sat</button>
+            <button class="day-btn" data-day="6">Sun</button>
+          </div>
+        </div>
+
+        <div class="ctrl-divider"></div>
+
+        <div class="ctrl-group">
+          <span class="control-label">Time</span>
+          <div id="time-display">07:00</div>
+          <div class="slider-wrap">
+            <span class="slider-edge">00:00</span>
+            <input type="range" id="time-slider" min="0" max="287" step="1" value="84">
+            <span class="slider-edge">23:55</span>
+          </div>
+        </div>
+
+        <div class="legend-inline">
+          <div class="legend-item"><div class="legend-dot" style="background:#fff;border:1px solid #555"></div><span>Stop</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:#FF6EC7"></div><span>Arriving &lt;5 min</span></div>
+        </div>
+      </div>
+
+      <div id="map-container">
+        <div id="loading">
+          <div class="spinner"></div>
+          <h2>Loading transit data…</h2>
+          <p id="loading-msg">Fetching Data File</p>
+        </div>
+        <canvas id="tile-canvas"></canvas>
+        <svg id="stop-svg"></svg>
+      </div>
+    </div>
+
+    <div class="viz-caption">Fig. 1 — King County Metro · Stop Arrivals</div>
+  </div>
+  <!-- ── End visualization ────────────────────────────── -->
+
+  <div class="article-text">
+    <div class="article-body">
+      <p>However, despite it's best efforts, busses run late, and students are left stranded or late to class. We investigated the patterns to find which routes and times are more impacted by late busses. Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap. Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap.</p>
+
+      <hr class="section-rule">
+
+      <p>Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap. Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap.</p>
+    </div>
+  </div>
+
+  <!-- we will have the second visualization here. -->
 </div>
 
 <div id="tooltip">
@@ -123,7 +365,6 @@ const TILE_SIZE = 256;
 const BASE_ZOOM = 12;
 const SEATTLE = { lat: 47.608, lon: -122.335 };
 
-// ── Mercator: lat/lon → world pixel at BASE_ZOOM ─────────────────────────────
 function latLonToWorld(lat, lon) {
   const scale = TILE_SIZE * Math.pow(2, BASE_ZOOM);
   const x = (lon + 180) / 360 * scale;
@@ -136,27 +377,27 @@ function worldToScreen(wx, wy, t) {
   return { x: t.x + wx * t.k, y: t.y + wy * t.k };
 }
 
-// ── Setup ─────────────────────────────────────────────────────────────────────
-let W = window.innerWidth, H = window.innerHeight;
+// ── Map dimensions come from #map-container, not window ──────────────────────
+const mapEl = document.getElementById('map-container');
+let W = mapEl.clientWidth, H = mapEl.clientHeight;
+
 const canvas = document.getElementById('tile-canvas');
 const ctx = canvas.getContext('2d');
 const stopSvg = d3.select('#stop-svg');
 
 function resize() {
-  W = window.innerWidth; H = window.innerHeight;
+  W = mapEl.clientWidth; H = mapEl.clientHeight;
   canvas.width = W; canvas.height = H;
   stopSvg.attr('width', W).attr('height', H);
 }
 resize();
 window.addEventListener('resize', () => { resize(); scheduleRender(); });
 
-// Center on Seattle
 const sw = latLonToWorld(SEATTLE.lat, SEATTLE.lon);
 let transform = d3.zoomIdentity.translate(W / 2 - sw.x, H / 2 - sw.y);
 
-// ── Tile cache & drawing ──────────────────────────────────────────────────────
+// ── Tile cache ────────────────────────────────────────────────────────────────
 const tileCache = new Map();
-
 function getTile(z, x, y) {
   const key = `${z}/${x}/${y}`;
   if (tileCache.has(key)) return tileCache.get(key);
@@ -171,30 +412,19 @@ function getTile(z, x, y) {
 function drawTiles() {
   ctx.fillStyle = '#1a1f2e';
   ctx.fillRect(0, 0, W, H);
-
-  // Clamp tile zoom to integer nearest log2(k) + BASE_ZOOM
   const tileZoom = Math.min(19, Math.max(0, Math.round(Math.log2(transform.k) + BASE_ZOOM)));
-  // How large is one tile in screen pixels at this zoom level?
-  // A tile at tileZoom covers 2^(BASE_ZOOM-tileZoom) base-zoom pixels, scaled by k
-  const tileScreenPx = TILE_SIZE * transform.k * Math.pow(2, tileZoom - BASE_ZOOM) / Math.pow(2, tileZoom - BASE_ZOOM);
-  // Simpler: world px per tile = TILE_SIZE * 2^(BASE_ZOOM-tileZoom), screen px = world * k
   const worldPxPerTile = TILE_SIZE * Math.pow(2, BASE_ZOOM - tileZoom);
   const screenPxPerTile = worldPxPerTile * transform.k;
-
   const n = Math.pow(2, tileZoom);
-
-  // Tile index of top-left visible corner
   const tx0 = Math.floor(-transform.x / screenPxPerTile);
   const ty0 = Math.floor(-transform.y / screenPxPerTile);
   const tx1 = Math.ceil((-transform.x + W) / screenPxPerTile);
   const ty1 = Math.ceil((-transform.y + H) / screenPxPerTile);
-
   for (let tx = tx0; tx <= tx1; tx++) {
     for (let ty = ty0; ty <= ty1; ty++) {
       if (ty < 0 || ty >= n) continue;
       const txx = ((tx % n) + n) % n;
       const img = getTile(tileZoom, txx, ty);
-      // Screen position of this tile's top-left corner
       const sx = transform.x + tx * screenPxPerTile;
       const sy = transform.y + ty * screenPxPerTile;
       if (img.complete && img.naturalWidth > 0) {
@@ -234,23 +464,21 @@ function updateTimeDisplay() {
   const mins = sliderToMinutes(sliderVal);
   const h = String(Math.floor(mins / 60) % 24).padStart(2, '0');
   const m = String(mins % 60).padStart(2, '0');
-  document.getElementById('time-display').innerHTML = `${h}<span>:${m}</span>`;
+  document.getElementById('time-display').textContent = `${h}:${m}`;
 }
 
-// ── Draw stops (SVG, viewport-culled) ────────────────────────────────────────
+// ── Draw stops ────────────────────────────────────────────────────────────────
 function drawStops() {
   if (!stopList.length) return;
   const dayStr = String(selectedDay);
   const pad = 20;
-
   const visible = stopList.filter(s => {
     if (!s.hasDay[dayStr]) return false;
     const p = worldToScreen(s.wx, s.wy, transform);
     return p.x >= -pad && p.x <= W + pad && p.y >= -pad && p.y <= H + pad;
   });
 
-  const r = Math.max(3, Math.min(8, transform.k * 0.35));
-
+  const r = Math.max(4, Math.min(8, transform.k * 0.35));
   const circles = stopSvg.selectAll('circle').data(visible, d => d.id);
 
   circles.enter().append('circle')
@@ -261,11 +489,11 @@ function drawStops() {
       document.getElementById('tt-routes').textContent = `Routes: ${routes}`;
       document.getElementById('tt-times').innerHTML = incoming.length
         ? incoming.map(a => `Route ${a.route} — ${a.time}`).join('<br>')
-        : '<span style="color:#4a5268">No arrivals in next 5 min</span>';
+        : '<span style="opacity:0.5">No arrivals in next 5 min</span>';
       const tip = document.getElementById('tooltip');
       tip.style.opacity = 1;
-      tip.style.left = (event.pageX + 14) + 'px';
-      tip.style.top  = (event.pageY - 10) + 'px';
+      tip.style.left = (event.clientX + 14) + 'px';
+      tip.style.top  = (event.clientY - 10) + 'px';
     })
     .on('mouseleave', () => { document.getElementById('tooltip').style.opacity = 0; })
     .merge(circles)
@@ -274,36 +502,27 @@ function drawStops() {
       const incoming = getIncomingTimes(d);
       const active = incoming.length > 0;
       d3.select(this)
-        .attr('cx', p.x).attr('cy', p.y)
-        .attr('r', r)
+        .attr('cx', p.x).attr('cy', p.y).attr('r', r)
         .attr('fill', active ? '#FF6EC7' : '#ffffff')
-        .attr('stroke', '#000000')
-        .attr('stroke-width', 1.5)
+        .attr('stroke', '#000').attr('stroke-width', 1.5)
         .style('filter', 'none');
     });
 
   circles.exit().remove();
 }
 
-// ── Render loop (RAF-throttled) ───────────────────────────────────────────────
+// ── Render loop ───────────────────────────────────────────────────────────────
 let rafPending = false;
 function scheduleRender() {
   if (rafPending) return;
   rafPending = true;
-  requestAnimationFrame(() => {
-    rafPending = false;
-    drawTiles();
-    drawStops();
-  });
+  requestAnimationFrame(() => { rafPending = false; drawTiles(); drawStops(); });
 }
 
-// ── Zoom ──────────────────────────────────────────────────────────────────────
+// ── Zoom — attach to map-container only ──────────────────────────────────────
 const zoomBehavior = d3.zoom()
   .scaleExtent([1, 10])
-  .on('zoom', (event) => {
-    transform = event.transform;
-    scheduleRender();
-  });
+  .on('zoom', (event) => { transform = event.transform; scheduleRender(); });
 
 d3.select('#map-container')
   .call(zoomBehavior)
@@ -325,14 +544,13 @@ document.getElementById('time-slider').addEventListener('input', function() {
   scheduleRender();
 });
 
-// ── Load data ─────────────────────────────────────────────────────────────────
+// ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
     const resp = await fetch('stops_locations.json');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     document.getElementById('loading-msg').textContent = 'Parsing…';
     const raw = await resp.json();
-
     stopList = Object.entries(raw).map(([id, s]) => {
       const w = latLonToWorld(s.lat, s.lon);
       const hasDay = {};
@@ -343,13 +561,12 @@ async function loadData() {
       }
       return { id, name: s.name, lat: s.lat, lon: s.lon, wx: w.x, wy: w.y, routes: s.routes, hasDay };
     });
-
     document.getElementById('loading').style.display = 'none';
     updateTimeDisplay();
     scheduleRender();
   } catch (e) {
     document.getElementById('loading-msg').textContent = `Error: ${e.message}`;
-    document.querySelector('#loading h2').textContent = 'Failed to load data';
+    document.querySelector('#loading h2').textContent = 'Failed to load';
     document.querySelector('.spinner').style.borderTopColor = '#ff5f3e';
   }
 }
