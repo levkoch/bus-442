@@ -361,8 +361,9 @@
 
 <script>
 const TILE_SIZE = 256;
-const BASE_ZOOM = 12;
-const SEATTLE = { lat: 47.608, lon: -122.335 };
+const BASE_ZOOM = 14;
+// uw cordinates
+const SEATTLE = { lat: 47.6566, lon: -122.3074 };
 
 function latLonToWorld(lat, lon) {
   const scale = TILE_SIZE * Math.pow(2, BASE_ZOOM);
