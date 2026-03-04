@@ -17,7 +17,7 @@
     --accent: #FF6EC7;
     --map-bg: #0a0c10;
     --border: #1e2330;
-    --text-map: #c8d0e0;
+    --text-map: #f5f0e8;
   }
 
   html { background: var(--bg); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
@@ -82,9 +82,9 @@
     font-size: 72px;
     font-weight: 700;
     float: left;
-    line-height: 0.8;
+    line-height: 0.75;
     margin-right: 8px;
-    margin-top: 8px;
+    margin-top: -4px; 
     color: var(--accent);
   }
 
@@ -279,7 +279,7 @@
   <div class="article-text">
     <div class="article-label">Transportation Infrastructure</div>
     <h1 class="article-title">The Bus Curse:<br><em>Investigating King County Bus Lateness</em></h1>
-    <div class="article-byline">By Lev Kochergin & Sonya Outhred &nbsp;·&nbsp; March 2026 &nbsp;</div>
+    <div class="article-byline">By Lev Kochergin & Sonya Outhred&nbsp;·&nbsp;March 2026</div>
 
     <div class="article-body">
       <p>Every commuter student at UW can relate to the bus curse: it seems that regardless of when you arrive to the bus stop, the universe will force you to wait ten minutes before you get picked up to your desination. Sound Transit bus routes intend to provide an effective system to funnel the 4.15 million Seattle metro area residents to their desinations. We explored showing which bus routes are active throuout the week.</p>
@@ -547,7 +547,7 @@ document.getElementById('time-slider').addEventListener('input', function() {
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    const resp = await fetch('stops_locations.json');
+    const resp = await fetch('scheduled/stops_locations.json');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     document.getElementById('loading-msg').textContent = 'Parsing…';
     const raw = await resp.json();
