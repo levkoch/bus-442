@@ -352,9 +352,11 @@ function drawStops() {
       const routeRows = Object.entries(d.routes).map(([routeId, route]) => {
         const meta = routesMeta[routeId] || {};
         const color = meta.color ? `#${meta.color}` : '#FF6EC7';
+        const textcolor = (color === '#2B376E' || color === '#9C182F') ? "color:#FFFFFF;" : "";
         const desc = meta.desc || '';
+        // if we have 2B376E or 9C182F background, we should have the text be white instead
         return `<div class="tt-route-row">
-          <span class="tt-route-pill" style="background:${color}">${route.short_name}</span>
+          <span class="tt-route-pill" style="background:${color};${textcolor}">${route.short_name}</span>
           <span class="tt-route-desc">${desc}</span>
         </div>`;
       }).join('');
