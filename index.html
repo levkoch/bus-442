@@ -12,12 +12,10 @@
   :root {
     --bg: #f5f0e8;
     --ink: #1a1610;
-    --muted: #aaa59e;
+    --muted: #78746f;
     --rule: #d4cbbf;
     --accent: #FF6EC7;
-    --map-bg: #0a0c10;
     --border: #1e2330;
-    --text-map: #f5f0e8;
   }
 
   html { background: var(--bg); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
@@ -41,24 +39,24 @@
 
   .viz-block { max-width: 90%; margin: 56px auto; }
   .viz-caption { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-top: 12px; text-align: center; }
-  .viz-shell { border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 4px 32px rgba(0,0,0,0.12); background: var(--map-bg); }
+  .viz-shell { border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 4px 32px rgba(0,0,0,0.12); background: var(--border); }
 
   #controls { background: rgba(11,14,20,0.97); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
   .ctrl-group { display: flex; align-items: center; gap: 12px; }
-  .control-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-map); white-space: nowrap; }
+  .control-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); white-space: nowrap; }
   #day-selector { display: flex; gap: 3px; }
-  .day-btn { background: transparent; border: 1px solid var(--border); color: var(--text-map); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; padding: 5px 8px; cursor: pointer; border-radius: 2px; transition: all 0.15s; }
+  .day-btn { background: transparent; border: 1px solid var(--border); color: var(--bg); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; padding: 5px 8px; cursor: pointer; border-radius: 2px; transition: all 0.15s; }
   .day-btn:hover { border-color: var(--accent); color: var(--accent); }
   .day-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 500; }
   .ctrl-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
   #time-display { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent); letter-spacing: -0.5px; white-space: nowrap; min-width: 56px; }
   .slider-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 160px; }
-  .slider-edge { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-map); white-space: nowrap; }
+  .slider-edge { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--bg); white-space: nowrap; }
   input[type=range] { appearance: none; -webkit-appearance: none; flex: 1; height: 2px; background: var(--border); outline: none; cursor: pointer; }
   input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 8px var(--accent); }
   input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
   .legend-inline { display: flex; gap: 14px; margin-left: auto; flex-shrink: 0; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-map); }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--bg); }
   .legend-item span { opacity: 0.7; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
@@ -67,9 +65,9 @@
   #stop-svg { position: absolute; inset: 0; pointer-events: none; }
   #stop-svg circle { pointer-events: all; }
 
-  #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--map-bg); z-index: 100; gap: 12px; }
+  #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--border); z-index: 100; gap: 12px; }
   #loading h2 { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: #fff; letter-spacing: 1px; }
-  #loading p { font-size: 11px; color: var(--text-map); font-family: 'DM Mono', monospace; opacity: 0.5; }
+  #loading p { font-size: 11px; color: var(--bg); font-family: 'DM Mono', monospace; opacity: 0.5; }
   .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -77,13 +75,13 @@
   #tooltip .tt-name { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
   #tooltip .tt-routes { margin-bottom: 8px; }
   #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
-  #tooltip .tt-times .no-arrivals { color: var(--text-map); opacity: 0.5; }
+  #tooltip .tt-times .no-arrivals { color: var(--bg); opacity: 0.5; }
 
   .tt-route-row { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px; }
   .tt-route-pill { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; line-height: 1.3; text-align: center; }
-  .tt-route-pill--number { width: 36px; white-space: nowrap; }
+  .tt-route-pill--number { width: 32px; white-space: nowrap; }
   .tt-route-pill--named { width: 48px; white-space: normal; word-break: break-word; }
-  .tt-route-desc { font-size: 10px; color: var(--text-map); opacity: 0.6; line-height: 1.3; }
+  .tt-route-desc { font-size: 10px; color: var(--bg); opacity: 0.6; line-height: 1.3; }
 </style>
 </head>
 <body>
@@ -163,7 +161,7 @@
 
       <hr class="section-rule">
 
-      <p>Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap. Yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap yap.</p>
+      <p>We plan to have a second visualization, which is similar to the one above, but focuses on where and which busses are late. We are still working on processing the data to make this happen.</p>
     </div>
   </div>
 
