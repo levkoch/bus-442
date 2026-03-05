@@ -430,12 +430,12 @@ document.getElementById('time-slider').addEventListener('input', function() {
 async function loadData() {
   try {
     // Kick off secondary files immediately — don't block on them
-    fetch('scheduled/route_shapes.json')
+    fetch('scheduled/route_meta.json')
       .then(r => r.ok ? r.json() : {})
       .then(data => { routesMeta = data; })
       .catch(() => {});
 
-    fetch('scheduled/shapes.json')
+    fetch('scheduled/route_shapes.json')
       .then(r => r.ok ? r.json() : {})
       .then(data => { shapesData = data; })
       .catch(() => {});
