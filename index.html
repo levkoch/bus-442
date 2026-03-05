@@ -526,7 +526,7 @@ function scheduleRender() {
 
 // ── Zoom — attach to map-container only ──────────────────────────────────────
 const zoomBehavior = d3.zoom()
-  .scaleExtent([1, 20])
+  .scaleExtent([0.3, 10])
   .on('zoom', (event) => { transform = event.transform; scheduleRender(); });
 
 d3.select('#map-container')
