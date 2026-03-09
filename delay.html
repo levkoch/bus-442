@@ -76,6 +76,7 @@
   #tooltip .tt-routes { margin-bottom: 8px; }
   #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
   #tooltip .tt-times .no-arrivals { color: var(--bg); opacity: 0.5; }
+  #tooltip .tt-delay { color: var(--accent); font-size: 11px; line-height: 1.6; }
 
   .tt-route-row { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px; }
   .tt-route-pill { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; line-height: 1.3; text-align: center; }
@@ -171,8 +172,8 @@
 <div id="tooltip">
   <div class="tt-name" id="tt-name"></div>
   <div class="tt-routes" id="tt-routes"></div>
+  <div class="tt-delay" id="tt-delay"></div>
   <div class="tt-times" id="tt-times"></div>
-  <div class="tt-late" id="tt-late"></div>
 </div>
 
 <script>
@@ -277,26 +278,29 @@ function getIncomingTimes(stop) {
   for (const route of Object.values(stop.routes)) {
     for (const t of (route.trips?.[dayStr] || [])) {
       const m = timeStrToMinutes(t[0]);
-      if (m >= cur && m <= end) arrivals.push({ time: t[0], route: route.short_name, late: t[1] });
+      if (m >= cur && m <= end) arrivals.push({ time: t[0], route: route.short_name, late_min: t[1], late_sec: t[2]  });
     }
   }
   return arrivals;
 }
 
-// function getLateTimes(stop) {
-//   const dayStr = String(selectedDay);
-//   const cur = sliderToMinutes(sliderVal);
-//   const end = cur + 5;
-//   const arrivals = [];
-//   for (const route of Object.values(stop.routes)) {
-//     for (const t of (route.trips?.[dayStr] || [])) {
-//       const m = timeStrToMinutes(t[0]);
-//       const l = t[1]
-//       if (m >= cur && m <= end) arrivals.push({ late: l, route: route.short_name });
-//     }
-//   }
-//   return arrivals;
-// }
+function overallDelay(stop){
+  const dayStr = String(selectedDay);
+  const cur = sliderToMinutes(sliderVal);
+  const end = cur + 5;
+  var sum = 0.0;
+  var count = 0.0;
+  for (const route of Object.values(stop.routes)) {
+    for (const t of (route.trips?.[dayStr] || [])) {
+      const m = timeStrToMinutes(t[0]);
+      if (m >= cur && m <= end) {
+        sum += parseFloat(t[2]);
+        count += 1.0;
+      };
+    }
+  }
+  return sum / count;
+}
 
 function updateTimeDisplay() {
   const mins = sliderToMinutes(sliderVal);
@@ -363,6 +367,9 @@ function drawStops() {
       showRouteLines(d);
 
       const incoming = getIncomingTimes(d);
+      const delay = overallDelay(d);
+      const delay_minutes = String(Math.floor(Math.abs(delay) / 60)).padStart(2, '0');
+      const delay_secs = String(Math.floor(Math.abs(delay) - (delay_minutes * 60))).padStart(2, '0');
 
       // Build route rows with pill + description
       const routeRows = Object.entries(d.routes).map(([routeId, route]) => {
@@ -381,9 +388,11 @@ function drawStops() {
 
       document.getElementById('tt-name').textContent = d.name;
       document.getElementById('tt-routes').innerHTML = routeRows;
+      document.getElementById('tt-delay').innerHTML = `On average ${delay < 0 ? `early by:`: 'late by:'}  ${delay_minutes}:${delay_secs}`;
       document.getElementById('tt-times').innerHTML = incoming.length
-        ? incoming.map(a => `${a.route} — ${a.time} - Avg_Delay: ${a.late}`).join('<br>')
+        ? incoming.map(a => `${a.route} — ${a.time} - ${a.late_sec < 0 ? `Early by:`: 'Late by'} ${a.late_min}`).join('<br>')
         : '<span class="no-arrivals">No arrivals in next 5 min</span>';
+
       const tip = document.getElementById('tooltip');
       tip.style.opacity = 1;
       tip.style.left = (event.clientX + 14) + 'px';
@@ -398,10 +407,12 @@ function drawStops() {
     .each(function(d) {
       const p = worldToScreen(d.wx, d.wy, transform);
       const incoming = getIncomingTimes(d);
+      const delay = overallDelay(d);
       const active = incoming.length > 0;
+      const early = delay < 0;
       d3.select(this)
-        .attr('cx', p.x).attr('cy', p.y).attr('r', r)
-        .attr('fill', active ? '#FF6EC7' : '#ffffff')
+        .attr('cx', p.x).attr('cy', p.y).attr('r', active? 4 * Math.abs(delay / 60.0) : r)
+        .attr('fill', active ? early ? '#87CEFA' : '#FF6EC7' : '#ffffff')
         .attr('stroke', '#000').attr('stroke-width', 1.5)
         .style('filter', 'none');
     });
