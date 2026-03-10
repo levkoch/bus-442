@@ -127,7 +127,7 @@
 
         <div class="ctrl-group">
           <span class="control-label">Time</span>
-          <div id="time-display">00:00</div>
+          <div id="time-display">--:--</div>
           <div class="slider-wrap">
             <span class="slider-edge">00:00</span>
             <input type="range" id="time-slider" min="0" max="287" step="1" value="84">
@@ -307,9 +307,12 @@ function updateTimeDisplay() {
 // ── Route lines ───────────────────────────────────────────────────────────────
 const ROUTE_COLORS = ['#2E6FAF','#D25151','#5EA179','#7F36D1','#D8AC48','#50BFD5','#B2B2B2'];
 
+let currentRouteLineColors = {};
+
 function showRouteLines(stop) {
   const linesG = d3.select('#route-lines');
   linesG.selectAll('*').remove();
+  currentRouteLineColors = {};
   if (!Object.keys(shapesData).length) return;
 
   let colorIdx = 0;
@@ -317,6 +320,7 @@ function showRouteLines(stop) {
     const shapes = shapesData[routeId];
     if (!shapes) return;
     const color = ROUTE_COLORS[colorIdx++ % ROUTE_COLORS.length];
+    currentRouteLineColors[routeId] = color;
 
     shapes.forEach(pts => {
       const pathStr = pts.map(([lat, lon], i) => {
@@ -374,15 +378,16 @@ function drawStops() {
           // otherwise they get ordered in string order (numbers still come first)
           return a.short_name.localeCompare(b.short_name);
         })
-        .map(([routeId, route]) => {
+        .map(([routeId, route], i) => {
           const meta = routesMeta[routeId] || {};
           const color = meta.color ? `#${meta.color}` : '#FF6EC7';
           const textcolor = (color === '#2B376E' || color === '#9C182F') ? "color:#FFFFFF;" : "";
           const desc = meta.desc || '';
-          // if we have 2B376E or 9C182F background, we should have the text be white instead
           const isNumber = /^\d+$/.test(route.short_name);
           const pillClass = isNumber ? 'tt-route-pill tt-route-pill--number' : 'tt-route-pill tt-route-pill--named';
+          const lineColor = currentRouteLineColors[routeId];
           return `<div class="tt-route-row">
+            <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${lineColor};flex-shrink:0;align-self:center;border:1px solid rgba(255,255,255);"></span>
             <span class="${pillClass}" style="background:${color};${textcolor}">${route.short_name}</span>
             <span class="tt-route-desc">${desc}</span>
           </div>`;
@@ -608,9 +613,6 @@ var drawHeatMap = function(data) {
     .on("mouseleave", mouseleave)
 
 }
-
-// Legend
-
 
 </script>
 </body>
