@@ -85,7 +85,21 @@
   /* header: route picker + metro line */
   #rv-header { padding: 18px 24px 0; border-bottom: 1px solid var(--border); }
   #rv-header-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
-  #rv-route-select { font-family: 'DM Mono', monospace; font-size: 11px; background: #1a1f2e; color: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; min-width: 180px; }
+  #rv-route-select { display: none; }
+  /* custom route picker */
+  #rv-route-picker { position: relative; min-width: 220px; font-family: 'DM Mono', monospace; font-size: 11px; user-select: none; }
+  #rv-picker-trigger { display: flex; align-items: center; gap: 8px; background: #1a1f2e; border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; color: var(--bg); min-height: 30px; }
+  #rv-picker-trigger:hover { border-color: var(--accent); }
+  #rv-picker-trigger .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
+  #rv-picker-trigger .rp-label { flex: 1; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #rv-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.4; font-size: 9px; }
+  #rv-picker-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1a1f2e; border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; max-height: 260px; overflow-y: auto; z-index: 500; }
+  #rv-picker-dropdown.open { display: block; }
+  .rp-option { display: flex; align-items: center; gap: 8px; padding: 5px 10px; cursor: pointer; color: var(--bg); font-size: 11px; }
+  .rp-option:hover { background: rgba(255,255,255,0.06); }
+  .rp-option.selected { background: rgba(255,110,199,0.1); }
+  .rp-option .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; min-width: 28px; text-align: center; }
+  .rp-option .rp-desc { opacity: 0.5; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rv-day-mode { display: flex; gap: 4px; }
   .rv-mode-btn { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border: 1px solid var(--border); background: transparent; color: var(--bg); border-radius: 2px; cursor: pointer; transition: all 0.15s; opacity: 0.6; }
   .rv-mode-btn.active { background: var(--accent); border-color: var(--accent); color: #000; opacity: 1; }
@@ -95,26 +109,37 @@
   #rv-mode-all .rv-day-filter { opacity: 0.3; pointer-events: none; }
 
   /* metro line strip */
-  #rv-metro-line { padding: 16px 0 12px; overflow-x: auto; white-space: nowrap; }
-  #rv-metro-line-inner { display: inline-flex; align-items: center; padding: 0 24px; min-width: 100%; }
-  .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: pointer; transition: opacity 0.15s; }
-  .rv-stop-node:hover { opacity: 0.75; }
-  .rv-stop-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); background: var(--bg); flex-shrink: 0; transition: transform 0.15s; }
-  .rv-stop-node.highlighted .rv-stop-dot { transform: scale(1.6); background: var(--accent); border-color: var(--accent); }
-  .rv-stop-label { font-size: 8px; color: var(--bg); opacity: 0.5; margin-top: 5px; text-align: center; max-width: 52px; white-space: normal; line-height: 1.2; }
+  #rv-metro-line { padding: 80px 0 16px; overflow-x: auto; white-space: nowrap; }
+  #rv-metro-line-inner { display: inline-flex; align-items: flex-end; padding: 0 24px; min-width: 100%; }
+  .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
+  .rv-stop-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); background: #0d1017; flex-shrink: 0; position: relative; z-index: 1; }
+  .rv-stop-node.highlighted .rv-stop-dot { background: var(--accent); border-color: var(--accent); transform: scale(1.4); }
+  .rv-stop-label {
+    font-size: 8px; color: var(--bg); opacity: 0.5;
+    position: absolute;
+    bottom: 14px; left: 50%;
+    transform-origin: bottom left;
+    transform: rotate(-45deg);
+    white-space: nowrap;
+    line-height: 1;
+    pointer-events: none;
+  }
   .rv-stop-node.highlighted .rv-stop-label { opacity: 1; color: var(--accent); }
-  .rv-line-seg { height: 2px; min-width: 24px; flex: 1; background: var(--bg); opacity: 0.3; align-self: flex-start; margin-top: 4px; }
+  /* line segments sit between nodes, vertically centred on the dot row */
+  .rv-line-seg { height: 2px; min-width: 28px; flex: 1; opacity: 0.5; margin-bottom: 4px; }
 
   /* heatmap */
   #rv-heatmap { padding: 20px 24px 24px; }
   .rv-heatmap-title { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.5; margin-bottom: 14px; }
   #rv-heatmap-grid { overflow-x: auto; }
-  .rv-hm-table { border-collapse: collapse; width: 100%; }
-  .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.4; text-align: center; padding: 0 2px 6px; font-weight: 400; }
-  .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; font-size: 8px; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .rv-hm-cell { width: 22px; height: 18px; border-radius: 2px; cursor: default; transition: opacity 0.1s; }
+  .rv-hm-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+  .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.4; text-align: center; padding: 0 0 6px; font-weight: 400; }
+  .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; font-size: 8px; width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rv-hm-table td { padding: 1px; }
+  .rv-hm-table td.rv-hm-row-label { padding-right: 8px; width: 110px; }
+  .rv-hm-cell { width: 100%; height: 16px; border-radius: 2px; cursor: default; display: block; transition: opacity 0.1s; }
   .rv-hm-cell:hover { opacity: 0.8; outline: 1px solid rgba(255,255,255,0.3); }
-  .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+  .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 110px; overflow: hidden; text-overflow: ellipsis; }
   #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.4; }
 
   /* heatmap tooltip */
@@ -194,6 +219,13 @@
       <div id="rv-header">
         <div id="rv-header-top">
           <select id="rv-route-select"><option value="">— select a route —</option></select>
+          <div id="rv-route-picker">
+            <div id="rv-picker-trigger">
+              <span class="rp-label">— select a route —</span>
+              <span class="rp-arrow">▾</span>
+            </div>
+            <div id="rv-picker-dropdown"></div>
+          </div>
           <div id="rv-mode-all" class="rv-day-mode">
             <button class="rv-mode-btn active" data-mode="all">All Days</button>
             <button class="rv-mode-btn" data-mode="one">One Day</button>
@@ -229,10 +261,7 @@
   <div class="tt-routes" id="tt-routes"></div>
   <div class="tt-delay" id="tt-delay"></div>
   <div class="tt-times" id="tt-times"></div>
-  <div id="tt-suggest" style="display:none">
-    <div class="tt-suggest-label">Jump to route:</div>
-    <div class="tt-suggest-btns" id="tt-suggest-btns"></div>
-  </div>
+
 </div>
 <div id="hm-tooltip"></div>
 
@@ -445,25 +474,6 @@ function drawStops() {
         ? incoming.map(a => `${a.route} — ${a.time} · ${a.late_sec < 0 ? 'Early' : 'Late'} ${a.late_min}`).join('<br>')
         : '<span class="no-arrivals">No arrivals in next 5 min</span>';
 
-      // Suggest buttons for route infographic
-      const routeIds = Object.keys(d.routes);
-      const suggestEl = document.getElementById('tt-suggest');
-      const btnsEl = document.getElementById('tt-suggest-btns');
-      if (routeIds.length > 0) {
-        btnsEl.innerHTML = routeIds.map(rid => {
-          const route = d.routes[rid];
-          const meta = routesMeta[rid] || {};
-          const color = meta.color ? `#${meta.color}` : '#FF6EC7';
-          const textcolor = (color === '#2B376E' || color === '#9C182F') ? '#fff' : '#000';
-          return `<button class="tt-suggest-btn" data-route-id="${rid}"
-            style="background:${color};color:${textcolor}"
-            onclick="selectRouteFromMap('${rid}')">${route.short_name}</button>`;
-        }).join('');
-        suggestEl.style.display = 'block';
-      } else {
-        suggestEl.style.display = 'none';
-      }
-
       const tip = document.getElementById('tooltip');
       tip.style.opacity = 1;
       tip.style.left = (event.clientX + 14) + 'px';
@@ -533,12 +543,9 @@ let rvHighlightedStop = null; // stop id string
 
 document.getElementById('rv-day-filter').style.display = 'none';
 
-// Route select dropdown
+// Route select dropdown (hidden, kept for compat)
 const rvSelect = document.getElementById('rv-route-select');
-rvSelect.addEventListener('change', () => {
-  rvSelectedRouteId = rvSelect.value || null;
-  renderRouteViz();
-});
+rvSelect.addEventListener('change', () => setPickerRoute(rvSelect.value || null));
 
 // Mode buttons
 document.querySelectorAll('.rv-mode-btn').forEach(btn => {
@@ -563,22 +570,57 @@ document.querySelectorAll('.rv-day-btn').forEach(btn => {
 
 // Called from map tooltip suggest buttons
 function selectRouteFromMap(routeId) {
-  rvSelectedRouteId = routeId;
-  rvSelect.value = routeId;
-  renderRouteViz();
+  setPickerRoute(routeId);
   document.getElementById('route-viz-block').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Populate dropdown after data loads
+// ── Custom route picker ───────────────────────────────────────────────────────
+const pickerTrigger = document.getElementById('rv-picker-trigger');
+const pickerDropdown = document.getElementById('rv-picker-dropdown');
+
+pickerTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  pickerDropdown.classList.toggle('open');
+});
+document.addEventListener('click', () => pickerDropdown.classList.remove('open'));
+
+function setPickerRoute(routeId) {
+  rvSelectedRouteId = routeId || null;
+  rvSelect.value = routeId || '';
+
+  // update trigger display
+  if (!routeId) {
+    pickerTrigger.innerHTML = `<span class="rp-label">— select a route —</span><span class="rp-arrow">▾</span>`;
+  } else {
+    const stop = stopList.find(s => s.routes[routeId]);
+    const route = stop?.routes[routeId];
+    const meta = routesMeta[routeId] || {};
+    const color = meta.color ? `#${meta.color}` : '#FF6EC7';
+    const textColor = (meta.color === '2B376E' || meta.color === '9C182F') ? '#fff' : '#000';
+    const name = route?.short_name || routeId;
+    const desc = meta.desc || '';
+    pickerTrigger.innerHTML = `
+      <span class="rp-pill" style="background:${color};color:${textColor}">${name}</span>
+      <span class="rp-label">${desc}</span>
+      <span class="rp-arrow">▾</span>`;
+  }
+
+  // mark selected in dropdown
+  pickerDropdown.querySelectorAll('.rp-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.routeId === routeId);
+  });
+
+  pickerDropdown.classList.remove('open');
+  renderRouteViz();
+}
+
 function populateRouteSelect() {
-  // Collect all route ids seen in stopList
-  const routeSet = new Map(); // id -> short_name
+  const routeSet = new Map();
   for (const stop of stopList) {
     for (const [rid, route] of Object.entries(stop.routes)) {
       if (!routeSet.has(rid)) routeSet.set(rid, route.short_name);
     }
   }
-  // Sort by short_name (numeric first, then alpha)
   const sorted = [...routeSet.entries()].sort((a, b) => {
     const na = parseInt(a[1]), nb = parseInt(b[1]);
     if (!isNaN(na) && !isNaN(nb)) return na - nb;
@@ -586,14 +628,37 @@ function populateRouteSelect() {
     if (!isNaN(nb)) return 1;
     return a[1].localeCompare(b[1]);
   });
+
+  // rebuild hidden select (for compat)
   rvSelect.innerHTML = '<option value="">— select a route —</option>';
+
+  // rebuild custom dropdown
+  pickerDropdown.innerHTML = '';
+  const blank = document.createElement('div');
+  blank.className = 'rp-option';
+  blank.dataset.routeId = '';
+  blank.innerHTML = `<span class="rp-label" style="opacity:0.4">— select a route —</span>`;
+  blank.addEventListener('click', (e) => { e.stopPropagation(); setPickerRoute(''); });
+  pickerDropdown.appendChild(blank);
+
   for (const [rid, name] of sorted) {
     const meta = routesMeta[rid] || {};
-    const desc = meta.desc ? ` · ${meta.desc}` : '';
+    const color = meta.color ? `#${meta.color}` : '#FF6EC7';
+    const textColor = (meta.color === '2B376E' || meta.color === '9C182F') ? '#fff' : '#000';
+    const desc = meta.desc || '';
+
     const opt = document.createElement('option');
-    opt.value = rid;
-    opt.textContent = `${name}${desc}`;
+    opt.value = rid; opt.textContent = `${name}${desc ? ' · ' + desc : ''}`;
     rvSelect.appendChild(opt);
+
+    const div = document.createElement('div');
+    div.className = 'rp-option';
+    div.dataset.routeId = rid;
+    div.innerHTML = `
+      <span class="rp-pill" style="background:${color};color:${textColor}">${name}</span>
+      <span class="rp-desc">${desc}</span>`;
+    div.addEventListener('click', (e) => { e.stopPropagation(); setPickerRoute(rid); });
+    pickerDropdown.appendChild(div);
   }
 }
 
@@ -650,26 +715,24 @@ function renderMetroLine(routeId) {
   const lineColor = meta.color ? `#${meta.color}` : '#FF6EC7';
 
   stops.forEach((stop, i) => {
-    // line segment before stop
+    // line segment between stops — sits flush with the dot baseline
     if (i > 0) {
       const seg = document.createElement('div');
       seg.className = 'rv-line-seg';
       seg.style.background = lineColor;
-      seg.style.opacity = '0.6';
       inner.appendChild(seg);
     }
 
+    const isHighlighted = stop.id === rvHighlightedStop;
     const node = document.createElement('div');
-    node.className = 'rv-stop-node' + (stop.id === rvHighlightedStop ? ' highlighted' : '');
+    node.className = 'rv-stop-node' + (isHighlighted ? ' highlighted' : '');
     node.dataset.stopId = stop.id;
-    node.title = stop.name;
+
+    const dotColor = isHighlighted ? lineColor : '#0d1017';
     node.innerHTML = `
-      <div class="rv-stop-dot" style="${stop.id === rvHighlightedStop ? `background:${lineColor};border-color:${lineColor}` : `border-color:${lineColor}`}"></div>
-      <div class="rv-stop-label">${stop.name}</div>`;
-    node.addEventListener('click', () => {
-      rvHighlightedStop = stop.id;
-      renderRouteViz();
-    });
+      <div class="rv-stop-label">${stop.name}</div>
+      <div class="rv-stop-dot" style="background:${dotColor};border-color:${lineColor}"></div>`;
+    // decorative only — no click handler
     inner.appendChild(node);
   });
 }
@@ -724,7 +787,6 @@ function renderHeatmap(routeId) {
     const { hours } = data[stop.id];
     for (let h = 0; h < 24; h++) {
       const td = document.createElement('td');
-      td.style.padding = '1px 1px';
       const cell = document.createElement('div');
       cell.className = 'rv-hm-cell';
       const val = hours[h];
