@@ -507,8 +507,8 @@ const svg = d3.select("#heatmap")
 
 
 //Read the data
-d3.csv("delays/FiveMinuteDelayAllAverage.csv").then(d => {
-  drawHeatMap(d)
+d3.csv("delays/FiveMinuteDelayAverageAcrossStop.csv").then(d => {
+  drawHeatMap(d.filter(function(d){return d.service_rte_num == 0}))
 }).catch(error => console.log(error))
 var drawHeatMap = function(data) {
   // Labels of row and columns
@@ -539,8 +539,8 @@ var drawHeatMap = function(data) {
 
   // Build color scale
   // Lowest value
-  const min = Math.round(d3.min(data, d => d.lateness) * 100) /100;
-  const max = Math.round(d3.max(data, d => d.lateness) * 100)/ 100;
+  const min = Math.round(d3.min(data, d => d.lateness_min)* 100) /100;
+  const max = Math.round(d3.max(data, d => d.lateness_min) * 100)/ 100;
   //legend
  const myColor = d3.scaleSequential()
     .interpolator(d3.interpolateInferno)
@@ -569,7 +569,7 @@ var drawHeatMap = function(data) {
   }
   const mousemove = function(event,d) {
     tooltip
-      .html("The exact value of<br>this cell is: " + d.lateness)
+      .html("The exact value of<br>this cell is: " + d.lateness_min)
       .style("left", (event.x_heat)/2 + "px")
       .style("top", (event.y_heat)/2 + "px")
   }
@@ -590,7 +590,7 @@ var drawHeatMap = function(data) {
       .attr("ry", 4)
       .attr("width", x_heat.bandwidth() )
       .attr("height", y_heat.bandwidth() )
-      .style("fill", function(d) { return myColor(d.lateness)})
+      .style("fill", function(d) { return myColor(d.lateness_min)})
       .style("stroke-width", 4)
       .style("stroke", "none")
       .style("opacity", 0.8)
