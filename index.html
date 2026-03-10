@@ -275,6 +275,8 @@ const _now = new Date();
 let selectedDay = _now.getDay() === 0 ? 6 : _now.getDay() - 1;
 const _nowMins = _now.getHours() * 60 + _now.getMinutes();
 let sliderVal = Math.round(_nowMins / 5);
+// initialize our current day of the week + time slider
+document.getElementById('time-slider').value = sliderVal;
 document.querySelector(`.day-btn[data-day="${selectedDay}"]`).classList.add('active');
 
 function sliderToMinutes(v) { return v * 5; }
