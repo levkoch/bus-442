@@ -110,9 +110,9 @@
 
   /* metro line strip */
   #rv-metro-line { padding: 80px 0 16px; overflow-x: auto; white-space: nowrap; }
-  #rv-metro-line-inner { display: inline-flex; align-items: flex-end; padding: 0 24px; min-width: 100%; }
+  #rv-metro-line-inner { display: inline-flex; align-items: flex-end; padding: 0 24px 0 60px; min-width: 100%; }
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
-  .rv-stop-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--bg); background: #0d1017; flex-shrink: 0; position: relative; z-index: 1; }
+  .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: #0d1017; flex-shrink: 0; position: relative; z-index: 1; }
   .rv-stop-node.highlighted .rv-stop-dot { background: var(--accent); border-color: var(--accent); transform: scale(1.4); }
   .rv-stop-label {
     font-size: 8px; color: var(--bg); opacity: 0.5;
@@ -126,7 +126,7 @@
   }
   .rv-stop-node.highlighted .rv-stop-label { opacity: 1; color: var(--accent); }
   /* line segments sit between nodes, vertically centred on the dot row */
-  .rv-line-seg { height: 2px; min-width: 28px; flex: 1; opacity: 0.5; margin-bottom: 4px; }
+  .rv-line-seg { height: 2px; min-width: 6px; flex: 1; opacity: 0.5; margin-bottom: 4px; }
 
   /* heatmap */
   #rv-heatmap { padding: 20px 24px 24px; }
