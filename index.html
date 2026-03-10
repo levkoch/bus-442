@@ -367,19 +367,29 @@ function drawStops() {
       const incoming = getIncomingTimes(d);
 
       // Build route rows with pill + description
-      const routeRows = Object.entries(d.routes).map(([routeId, route]) => {
-        const meta = routesMeta[routeId] || {};
-        const color = meta.color ? `#${meta.color}` : '#FF6EC7';
-        const textcolor = (color === '#2B376E' || color === '#9C182F') ? "color:#FFFFFF;" : "";
-        const desc = meta.desc || '';
-        // if we have 2B376E or 9C182F background, we should have the text be white instead
-        const isNumber = /^\d+$/.test(route.short_name);
-        const pillClass = isNumber ? 'tt-route-pill tt-route-pill--number' : 'tt-route-pill tt-route-pill--named';
-        return `<div class="tt-route-row">
-          <span class="${pillClass}" style="background:${color};${textcolor}">${route.short_name}</span>
-          <span class="tt-route-desc">${desc}</span>
-        </div>`;
-      }).join('');
+      const routeRows = Object.entries(d.routes)
+        .sort(([, a], [, b]) => {
+          // if they are numbers, sort them in number order
+          const na = parseInt(a.short_name), nb = parseInt(b.short_name);
+          if (!isNaN(na) && !isNaN(nb)) return na - nb;
+          if (!isNaN(na)) return -1;
+          if (!isNaN(nb)) return 1;
+          // otherwise they get ordered in string order (numbers still come first)
+          return a.short_name.localeCompare(b.short_name);
+        })
+        .map(([routeId, route]) => {
+          const meta = routesMeta[routeId] || {};
+          const color = meta.color ? `#${meta.color}` : '#FF6EC7';
+          const textcolor = (color === '#2B376E' || color === '#9C182F') ? "color:#FFFFFF;" : "";
+          const desc = meta.desc || '';
+          // if we have 2B376E or 9C182F background, we should have the text be white instead
+          const isNumber = /^\d+$/.test(route.short_name);
+          const pillClass = isNumber ? 'tt-route-pill tt-route-pill--number' : 'tt-route-pill tt-route-pill--named';
+          return `<div class="tt-route-row">
+            <span class="${pillClass}" style="background:${color};${textcolor}">${route.short_name}</span>
+            <span class="tt-route-desc">${desc}</span>
+          </div>`;
+        }).join('');
 
       document.getElementById('tt-name').textContent = d.name;
       document.getElementById('tt-routes').innerHTML = routeRows;
