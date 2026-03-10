@@ -76,13 +76,13 @@
   #tooltip .tt-routes { margin-bottom: 8px; }
   #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
   #tooltip .tt-times .no-arrivals { color: var(--bg); opacity: 0.5; }
-  #tooltip .tt-delay { color: var(--accent); font-size: 11px; line-height: 1.6; }
+  #tooltip .tt-delay { color: var(--accent); font-size: 11px; line-height: 1.6; margin-bottom: 6px; }
 
   .tt-route-row { display: flex; align-items: flex-start; gap: 7px; margin-bottom: 5px; }
   .tt-route-pill { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; line-height: 1.3; text-align: center; }
   .tt-route-pill--number { width: 32px; white-space: nowrap; }
   .tt-route-pill--named { width: 48px; white-space: normal; word-break: break-word; }
-  .tt-route-desc { font-size: 10px; color: var(--bg); opacity: 0.6; line-height: 1.3; }
+  .tt-route-desc { font-size: 10px; color: var(--bg); opacity: 0.6; line-height: 1.3; flex: 1; min-width: 0; }
 </style>
 </head>
 <body>
@@ -133,8 +133,8 @@
         </div>
 
         <div class="legend-inline">
-          <div class="legend-item"><div class="legend-dot" style="background:#FFFFFF;"></div><span>Stop</span></div>
-          <div class="legend-item"><div class="legend-dot" style="background:#FF6EC7;"></div><span>Arrival in next 5 minutes</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(135,206,250,0.6);border:1px solid #87CEFA"></div><span>Running early</span></div>
+          <div class="legend-item"><div class="legend-dot" style="background:rgba(255,110,199,0.6);border:1px solid #FF6EC7"></div><span>Running late</span></div>
         </div>
       </div>
 
@@ -152,7 +152,7 @@
 
     </div>
 
-    <div class="viz-caption">Fig. 1 — King County Metro Scheduled Arrivals</div>
+    <div class="viz-caption">Fig. 2 — King County Metro · Rolling Average Lateness by Stop</div>
   </div>
   <!-- ── End visualization ────────────────────────────── -->
 
@@ -179,7 +179,6 @@
 <script>
 const TILE_SIZE = 256;
 const BASE_ZOOM = 14;
-// uw coordinates
 const SEATTLE = { lat: 47.6566, lon: -122.3074 };
 
 function latLonToWorld(lat, lon) {
@@ -256,7 +255,6 @@ let routesMeta = {};
 let shapesData = {};
 let hoveredStop = null;
 
-// initalize to current date and time
 const _now = new Date();
 let selectedDay = _now.getDay() === 0 ? 6 : _now.getDay() - 1;
 const _nowMins = _now.getHours() * 60 + _now.getMinutes();
@@ -270,6 +268,7 @@ function timeStrToMinutes(t) {
   return parseInt(h) * 60 + parseInt(m);
 }
 
+// ── Incoming arrivals (next 5 min window) ─────────────────────────────────────
 function getIncomingTimes(stop) {
   const dayStr = String(selectedDay);
   const cur = sliderToMinutes(sliderVal);
@@ -278,28 +277,42 @@ function getIncomingTimes(stop) {
   for (const route of Object.values(stop.routes)) {
     for (const t of (route.trips?.[dayStr] || [])) {
       const m = timeStrToMinutes(t[0]);
-      if (m >= cur && m <= end) arrivals.push({ time: t[0], route: route.short_name, late_min: t[1], late_sec: t[2]  });
+      if (m >= cur && m <= end) arrivals.push({ time: t[0], route: route.short_name, late_min: t[1], late_sec: t[2] });
     }
   }
   return arrivals;
 }
 
-function overallDelay(stop){
+// ── Rolling 5-arrival average lateness per route, then averaged across routes ─
+// For each route at this stop, find the 5 trips (on selected day) whose
+// scheduled time is closest to the current selected time, take their average
+// lateness. Then average across all routes that have data.
+function rollingAverageDelay(stop) {
   const dayStr = String(selectedDay);
   const cur = sliderToMinutes(sliderVal);
-  const end = cur + 5;
-  var sum = 0.0;
-  var count = 0.0;
+  const WINDOW = 5; // number of closest arrivals to average
+
+  const routeAvgs = [];
+
   for (const route of Object.values(stop.routes)) {
-    for (const t of (route.trips?.[dayStr] || [])) {
-      const m = timeStrToMinutes(t[0]);
-      if (m >= cur && m <= end) {
-        sum += parseFloat(t[2]);
-        count += 1.0;
-      };
-    }
+    const trips = route.trips?.[dayStr] || [];
+    if (!trips.length) continue;
+
+    // Sort all trips by absolute time-distance from current time
+    const sorted = trips
+      .map(t => ({ distMin: Math.abs(timeStrToMinutes(t[0]) - cur), lateSec: parseFloat(t[2]) }))
+      .sort((a, b) => a.distMin - b.distMin);
+
+    // Take up to WINDOW closest
+    const window = sorted.slice(0, WINDOW);
+    if (!window.length) continue;
+
+    const avg = window.reduce((sum, t) => sum + t.lateSec, 0) / window.length;
+    routeAvgs.push(avg);
   }
-  return sum / count;
+
+  if (!routeAvgs.length) return null; // no data for this day
+  return routeAvgs.reduce((s, v) => s + v, 0) / routeAvgs.length;
 }
 
 function updateTimeDisplay() {
@@ -307,6 +320,14 @@ function updateTimeDisplay() {
   const h = String(Math.floor(mins / 60) % 24).padStart(2, '0');
   const m = String(mins % 60).padStart(2, '0');
   document.getElementById('time-display').textContent = `${h}:${m}`;
+}
+
+// ── Format a delay in seconds as mm:ss ───────────────────────────────────────
+function formatDelay(sec) {
+  const abs = Math.abs(sec);
+  const mm = String(Math.floor(abs / 60)).padStart(2, '0');
+  const ss = String(Math.floor(abs % 60)).padStart(2, '0');
+  return `${mm}:${ss}`;
 }
 
 // ── Route lines ───────────────────────────────────────────────────────────────
@@ -322,14 +343,12 @@ function showRouteLines(stop) {
     const shapes = shapesData[routeId];
     if (!shapes) return;
     const color = ROUTE_COLORS[colorIdx++ % ROUTE_COLORS.length];
-
     shapes.forEach(pts => {
       const pathStr = pts.map(([lat, lon], i) => {
         const w = latLonToWorld(lat, lon);
         const p = worldToScreen(w.x, w.y, transform);
         return `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`;
       }).join(' ');
-
       linesG.append('path')
         .attr('d', pathStr)
         .attr('fill', 'none')
@@ -352,13 +371,15 @@ function drawStops() {
   if (!stopList.length) return;
   const dayStr = String(selectedDay);
   const pad = 20;
+
+  // Show all stops that have ANY service on this day (not just in the 5-min window)
   const visible = stopList.filter(s => {
     if (!s.hasDay[dayStr]) return false;
     const p = worldToScreen(s.wx, s.wy, transform);
     return p.x >= -pad && p.x <= W + pad && p.y >= -pad && p.y <= H + pad;
   });
 
-  const r = Math.max(4, Math.min(8, transform.k * 0.35));
+  const baseR = Math.max(3, Math.min(6, transform.k * 0.3));
   const circles = stopSvg.selectAll('circle').data(visible, d => d.id);
 
   circles.enter().append('circle')
@@ -367,17 +388,14 @@ function drawStops() {
       showRouteLines(d);
 
       const incoming = getIncomingTimes(d);
-      const delay = overallDelay(d);
-      const delay_minutes = String(Math.floor(Math.abs(delay) / 60)).padStart(2, '0');
-      const delay_secs = String(Math.floor(Math.abs(delay) - (delay_minutes * 60))).padStart(2, '0');
+      const delay = rollingAverageDelay(d);
 
-      // Build route rows with pill + description
+      // Route rows
       const routeRows = Object.entries(d.routes).map(([routeId, route]) => {
         const meta = routesMeta[routeId] || {};
         const color = meta.color ? `#${meta.color}` : '#FF6EC7';
-        const textcolor = (color === '#2B376E' || color === '#9C182F') ? "color:#FFFFFF;" : "";
+        const textcolor = (color === '#2B376E' || color === '#9C182F') ? 'color:#FFFFFF;' : '';
         const desc = meta.desc || '';
-        // if we have 2B376E or 9C182F background, we should have the text be white instead
         const isNumber = /^\d+$/.test(route.short_name);
         const pillClass = isNumber ? 'tt-route-pill tt-route-pill--number' : 'tt-route-pill tt-route-pill--named';
         return `<div class="tt-route-row">
@@ -388,9 +406,17 @@ function drawStops() {
 
       document.getElementById('tt-name').textContent = d.name;
       document.getElementById('tt-routes').innerHTML = routeRows;
-      document.getElementById('tt-delay').innerHTML = `On average ${delay < 0 ? `early by:`: 'late by:'}  ${delay_minutes}:${delay_secs}`;
+
+      if (delay !== null) {
+        const sign = delay < 0 ? 'early' : 'late';
+        document.getElementById('tt-delay').innerHTML =
+          `Avg (nearest 5): <strong style="color:${delay < 0 ? '#87CEFA' : '#FF6EC7'}">${sign} ${formatDelay(delay)}</strong>`;
+      } else {
+        document.getElementById('tt-delay').innerHTML = '<span style="opacity:0.4">No delay data</span>';
+      }
+
       document.getElementById('tt-times').innerHTML = incoming.length
-        ? incoming.map(a => `${a.route} — ${a.time} - ${a.late_sec < 0 ? `Early by:`: 'Late by'} ${a.late_min}`).join('<br>')
+        ? incoming.map(a => `${a.route} — ${a.time} · ${a.late_sec < 0 ? 'Early' : 'Late'} ${a.late_min}`).join('<br>')
         : '<span class="no-arrivals">No arrivals in next 5 min</span>';
 
       const tip = document.getElementById('tooltip');
@@ -406,20 +432,35 @@ function drawStops() {
     .merge(circles)
     .each(function(d) {
       const p = worldToScreen(d.wx, d.wy, transform);
-      const incoming = getIncomingTimes(d);
-      const delay = overallDelay(d);
-      const active = incoming.length > 0;
-      const early = delay < 0;
+      const delay = rollingAverageDelay(d); // seconds, or null
+
+      let fill, r;
+      if (delay === null) {
+        // No data for this day — show as neutral grey
+        fill = 'rgba(180,180,180,0.35)';
+        r = baseR;
+      } else {
+        const absSec = Math.abs(delay);
+        const early = delay < 0;
+        // Scale radius: 0 sec = baseR, 5 min (300s) = baseR * 4, capped
+        r = baseR + Math.min(absSec / 300, 1) * baseR * 3;
+        // Transparent fill: more opaque the worse the delay
+        const alpha = 0.25 + Math.min(absSec / 300, 1) * 0.5;
+        fill = early
+          ? `rgba(135,206,250,${alpha.toFixed(2)})`   // blue for early
+          : `rgba(255,110,199,${alpha.toFixed(2)})`;  // pink for late
+      }
+
       d3.select(this)
-        .attr('cx', p.x).attr('cy', p.y).attr('r', active? 4 * Math.abs(delay / 60.0) : r)
-        .attr('fill', active ? early ? '#87CEFA' : '#FF6EC7' : '#ffffff')
-        .attr('stroke', '#000').attr('stroke-width', 1.5)
+        .attr('cx', p.x).attr('cy', p.y).attr('r', r)
+        .attr('fill', fill)
+        .attr('stroke', delay === null ? 'rgba(180,180,180,0.5)' : (delay < 0 ? '#87CEFA' : '#FF6EC7'))
+        .attr('stroke-width', 1)
         .style('filter', 'none');
     });
 
   circles.exit().remove();
 
-  // Redraw route lines on top if a stop is still hovered (handles pan/zoom)
   if (hoveredStop) showRouteLines(hoveredStop);
 }
 
@@ -459,7 +500,6 @@ document.getElementById('time-slider').addEventListener('input', function() {
 // ── Load ──────────────────────────────────────────────────────────────────────
 async function loadData() {
   try {
-    // Kick off secondary files immediately — don't block on them
     fetch('scheduled/route_meta.json')
       .then(r => r.ok ? r.json() : {})
       .then(data => { routesMeta = data; })
@@ -470,7 +510,6 @@ async function loadData() {
       .then(data => { shapesData = data; })
       .catch(() => {});
 
-    // Only block on the stops file
     const resp = await fetch('scheduled/stops_locations_lateness.json');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     document.getElementById('loading-msg').textContent = 'Parsing…';
