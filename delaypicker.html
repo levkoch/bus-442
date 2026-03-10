@@ -531,6 +531,8 @@ let rvMode = 'all';   // 'all' | 'one'
 let rvDay = 0;
 let rvHighlightedStop = null; // stop id string
 
+document.getElementById('rv-day-filter').style.display = 'none';
+
 // Route select dropdown
 const rvSelect = document.getElementById('rv-route-select');
 rvSelect.addEventListener('change', () => {
@@ -544,9 +546,7 @@ document.querySelectorAll('.rv-mode-btn').forEach(btn => {
     document.querySelectorAll('.rv-mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     rvMode = btn.dataset.mode;
-    // toggle day filter visibility via parent id
-    document.getElementById('rv-mode-all').id = rvMode === 'one' ? 'rv-mode-one' : 'rv-mode-all';
-    if (rvMode !== 'one') document.getElementById('rv-mode-one') && (document.getElementById('rv-mode-one').id = 'rv-mode-all');
+    document.getElementById('rv-day-filter').style.display = rvMode === 'one' ? 'flex' : 'none';
     renderRouteViz();
   });
 });
