@@ -410,7 +410,7 @@ function drawStops() {
       if (delay !== null) {
         const sign = delay < 0 ? 'early' : 'late';
         document.getElementById('tt-delay').innerHTML =
-          `Avg (nearest 5): <strong style="color:${delay < 0 ? '#87CEFA' : '#FF6EC7'}">${sign} ${formatDelay(delay)}</strong>`;
+          `Lateness: <strong style="color:${delay < 0 ? '#87CEFA' : '#FF6EC7'}">${sign} ${formatDelay(delay)}</strong>`;
       } else {
         document.getElementById('tt-delay').innerHTML = '<span style="opacity:0.4">No delay data</span>';
       }
@@ -437,18 +437,16 @@ function drawStops() {
       let fill, r;
       if (delay === null) {
         // No data for this day — show as neutral grey
-        fill = 'rgba(180,180,180,0.35)';
+        fill = 'rgba(180,180,180,0.7)';
         r = baseR;
       } else {
         const absSec = Math.abs(delay);
         const early = delay < 0;
         // Scale radius: 0 sec = baseR, 5 min (300s) = baseR * 4, capped
         r = baseR + Math.min(absSec / 300, 1) * baseR * 3;
-        // Transparent fill: more opaque the worse the delay
-        const alpha = 0.25 + Math.min(absSec / 300, 1) * 0.5;
         fill = early
-          ? `rgba(135,206,250,${alpha.toFixed(2)})`   // blue for early
-          : `rgba(255,110,199,${alpha.toFixed(2)})`;  // pink for late
+          ? 'rgba(135,206,250,0.7)' 
+          : 'rgba(255,110,199,0.7)'; 
       }
 
       d3.select(this)
