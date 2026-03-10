@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Bus Curse: Investigating King County Bus Lateness</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<script src="../colorlegend.js"></script>
+<script src="colorlegend.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <style>
@@ -85,7 +85,7 @@
   .tt-route-pill--named { width: 48px; white-space: normal; word-break: break-word; }
   .tt-route-desc { font-size: 10px; color: var(--bg); opacity: 0.6; line-height: 1.3; }
 
-  #heatmap { position: relative; width: 100%; height: 80vh; overflow: hidden; }
+  #heatmap { position: relative; inset: 0; }
 </style>
 </head>
 <body>
@@ -171,16 +171,13 @@
 
   <!-- we will have the second visualization here. -->
   <div class="viz-block">
-    <div id="controls">
-      <div class="ctrl-group">
-      <div id="dropdown_heatmap"></div>
-      </div>
-      <svg id="legend_heatmap" height=300 width=450></svg>
-    </div>
      <div class="viz-shell">
-      <div id="heatmap"></div>
-      <p>This is our heatmap</p>
+        <div class="legend-inline">
+           <div class="legend-item"><svg id="legend_heatmap"></svg></div>
+        </div>
+        <div id="heatmap"></div>
     </div>
+  <div class="viz-caption">Fig. 3 — HeatMap of Average Delay</div>
   </div>
 </div>
 
@@ -504,8 +501,8 @@ loadData();
 // Heatmap setup:
 // Margins
 // set the dimensions and margins of the graph
-const margin_heat = {top: 100, right: 100, bottom: 100, left: 100},
-  width_heat = 1150 - margin_heat.left - margin_heat.right,
+const margin_heat = {top: 40, right: 80, bottom: 40, left: 80},
+  width_heat = 1250 - margin_heat.left - margin_heat.right,
   height_heat = 1250 - margin_heat.top - margin_heat.bottom;
 
 // append the svg object to the body of the page
