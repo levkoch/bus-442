@@ -396,7 +396,7 @@ function drawStops() {
       document.getElementById('tt-name').textContent = d.name;
       document.getElementById('tt-routes').innerHTML = routeRows;
       document.getElementById('tt-times').innerHTML = incoming.length
-        ? incoming.map(a => `${a.route} — ${a.time}`).join('<br>')
+        ? 'Upcoming arrivals:<br>' + incoming.map(a => `${a.route} — ${a.time}`).join('<br>')
         : '<span class="no-arrivals">No arrivals in next 5 min</span>';
 
       const tip = document.getElementById('tooltip');
