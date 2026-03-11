@@ -107,7 +107,7 @@
   /* metro line — 80% wide, centered; collapses when no route */
   #rv-metro-line { overflow-x: auto; overflow-y: visible; transition: padding 0.2s; }
   #rv-metro-line.no-route  { height: 0; padding: 0; overflow: hidden; }
-  #rv-metro-line.has-route { padding: 80px 10% 16px; }
+  #rv-metro-line.has-route { padding: 80px 5% 16px 15%; }
   #rv-metro-line-inner { display: inline-flex; align-items: flex-end; min-width: 100%; }
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
   .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: #0d1017; flex-shrink: 0; position: relative; z-index: 1; }
@@ -133,7 +133,7 @@
 
   /* Fig 2 inline legend */
   .rv-legend-strip { display: flex; align-items: center; gap: 6px; }
-  .rv-legend-strip-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--bg); white-space: nowrap; }
+  .rv-legend-strip-label { font-family: 'DM Mono', monospace;  text-transform: uppercase;font-size: 9px; color: var(--bg); opacity: 0.5; white-space: nowrap; }
   .rv-swatch-row { display: flex; gap: 2px; }
   .rv-swatch { width: 16px; height: 10px; border-radius: 2px; }
   /* heatmap tooltip */
@@ -239,7 +239,7 @@
           </div>
           <div id="rv-mode-all" class="rv-day-mode">
             <button class="rv-mode-btn active" data-mode="all">All Days</button>
-            <button class="rv-mode-btn" data-mode="one">One Day</button>
+            <button class="rv-mode-btn" data-mode="one">Single Day</button>
           </div>
           <div class="rv-day-filter" id="rv-day-filter">
             <button class="rv-day-btn active" data-day="0">Mon</button>
