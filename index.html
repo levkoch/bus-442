@@ -127,7 +127,7 @@
   /* metro line — collapses when no route selected */
   #rv-metro-line { overflow-x: auto; overflow-y: visible; transition: padding 0.2s; }
   #rv-metro-line.no-route  { height: 0; padding: 0; overflow: hidden; }
-  #rv-metro-line.has-route { padding: 80px 15% 16px 5%; }
+  #rv-metro-line.has-route { padding: 80px 10% 16px 5%; }
   #rv-metro-line-inner { display: inline-flex; align-items: flex-end; min-width: 100%; }
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
   .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: var(--dark); flex-shrink: 0; position: relative; z-index: 1; }
@@ -609,7 +609,7 @@ function setPickerRoute(routeId) {
   rvSelectedRouteId=routeId||null;
   document.getElementById('rv-route-select').value=routeId||'';
   if (!routeId) {
-    pickerTrigger.innerHTML=`<span class="rp-label">— select a route —</span><span class="rp-arrow">▾</span>`;
+    pickerTrigger.innerHTML=`<span class="rp-label">Select a Route</span><span class="rp-arrow">▾</span>`;
   } else {
     const stop=rvStopList.find(s=>s.routes[routeId]);
     const route=stop?.routes[routeId]; const meta=rvRoutesMeta[routeId]||{};
@@ -634,25 +634,51 @@ function populateRouteSelect() {
     if (!isNaN(na)) return -1; if (!isNaN(nb)) return 1;
     return a[1].localeCompare(b[1]);
   });
+
+  // shared helper to build one option div
+  function makeRpOption(rid, name, desc, color, textColor) {
+    const div=document.createElement('div');
+    div.className='rp-option'; div.dataset.routeId=rid;
+    div.innerHTML=`<span class="rp-pill" style="background:${color};color:${textColor}">${name}</span><span class="rp-desc">${desc}</span>`;
+    return div;
+  }
+
+  // ── Fig 2 picker ──
   const rvSel=document.getElementById('rv-route-select');
-  rvSel.innerHTML='<option value="">— select a route —</option>';
+  rvSel.innerHTML='<option value="">Select a Route</option>';
   pickerDropdown.innerHTML='';
   const blank=document.createElement('div');
   blank.className='rp-option'; blank.dataset.routeId='';
-  blank.innerHTML=`<span class="rp-label" style="opacity:0.4">— select a route —</span>`;
+  blank.innerHTML=`<span class="rp-label" style="opacity:0.4">Select a Route</span>`;
   blank.addEventListener('click', e=>{e.stopPropagation();setPickerRoute('');});
   pickerDropdown.appendChild(blank);
+
+  // ── Fig 3 picker ──
+  fig3PickerDropdown.innerHTML='';
+  const allDiv=document.createElement('div');
+  allDiv.className='rp-option selected'; allDiv.dataset.rte='0';
+  allDiv.innerHTML=`<span class="rp-label">All Routes</span>`;
+  allDiv.addEventListener('click', e=>{e.stopPropagation(); setFig3Route('0','All Routes');});
+  fig3PickerDropdown.appendChild(allDiv);
+
   for (const [rid,name] of sorted) {
     const meta=rvRoutesMeta[rid]||{};
     const color=meta.color?`#${meta.color}`:'#FF6EC7';
     const textColor=(meta.color==='2B376E'||meta.color==='9C182F')?'#fff':'#000';
     const desc=meta.desc||'';
+
+    // Fig 2
     const opt=document.createElement('option'); opt.value=rid; opt.textContent=`${name}${desc?' · '+desc:''}`;
     rvSel.appendChild(opt);
-    const div=document.createElement('div'); div.className='rp-option'; div.dataset.routeId=rid;
-    div.innerHTML=`<span class="rp-pill" style="background:${color};color:${textColor}">${name}</span><span class="rp-desc">${desc}</span>`;
-    div.addEventListener('click', e=>{e.stopPropagation();setPickerRoute(rid);});
-    pickerDropdown.appendChild(div);
+    const d2=makeRpOption(rid,name,desc,color,textColor);
+    d2.addEventListener('click', e=>{e.stopPropagation();setPickerRoute(rid);});
+    pickerDropdown.appendChild(d2);
+
+    // Fig 3
+    const d3el=makeRpOption(rid,name,desc,color,textColor);
+    d3el.dataset.rte=rid;
+    d3el.addEventListener('click', e=>{e.stopPropagation(); setFig3Route(rid,`<span class="rp-pill" style="background:${color};color:${textColor}">${name}</span> ${desc}`);});
+    fig3PickerDropdown.appendChild(d3el);
   }
 }
 
@@ -792,15 +818,16 @@ buildSwatchStrip('fig3-swatches', 13);
 const DAYS_LABEL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const margin3={top:20, right:20, bottom:36, left:58};
 
-let fig3GlobalMin=0, fig3GlobalMax=1;
+fig3GlobalMin = 0;
+fig3GlobalMax = d3.max(raw, d => +d.lateness_min) || 1;
 let fig3CurrentRoute='0';
 
-function setFig3Route(rte, label) {
+function setFig3Route(rte, labelHTML) {
   fig3CurrentRoute = rte;
   const trigger = document.getElementById('fig3-picker-trigger');
-  trigger.innerHTML = `<span class="rp-label">${label}</span><span class="rp-arrow">&#9662;</span>`;
+  trigger.innerHTML = `${labelHTML}<span class="rp-arrow">&#9662;</span>`;
   document.querySelectorAll('#fig3-picker-dropdown .rp-option').forEach(el =>
-    el.classList.toggle('selected', el.dataset.rte === rte));
+    el.classList.toggle('selected', (el.dataset.rte||el.dataset.routeId) === rte));
   document.getElementById('fig3-picker-dropdown').classList.remove('open');
   drawFig3(fig3AllData.filter(d => d.service_rte_num == rte));
 }
@@ -867,21 +894,8 @@ document.addEventListener('click', ()=>fig3PickerDropdown.classList.remove('open
 
 d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
   fig3AllData=raw;
-  fig3GlobalMin=d3.min(raw,d=>+d.lateness_min)||0;
+  fig3GlobalMin=0;
   fig3GlobalMax=d3.max(raw,d=>+d.lateness_min)||1;
-
-  const routes=[...new Set(raw.map(d=>d.service_rte_num))].sort((a,b)=>+a-+b);
-  fig3PickerDropdown.innerHTML='';
-  for (const r of routes) {
-    const label = r=='0' ? 'All routes' : `Route ${r}`;
-    const div=document.createElement('div');
-    div.className='rp-option'; div.dataset.rte=r;
-    if (r=='0') div.classList.add('selected');
-    div.innerHTML=`<span class="rp-label">${label}</span>`;
-    div.addEventListener('click', e=>{e.stopPropagation(); setFig3Route(r, label);});
-    fig3PickerDropdown.appendChild(div);
-  }
-
   drawFig3(raw.filter(d=>d.service_rte_num=='0'));
 }).catch(err=>{
   console.warn('Fig 3 data not available:',err);
