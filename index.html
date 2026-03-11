@@ -871,7 +871,11 @@ function drawFig3(data) {
     .attr('x',d=>x3(d.weekday))
     .attr('y',d=>y3(d.sched_arr_time_formatted.slice(0,5)))
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
-    .style('fill',d=>heatColor(Math.max(0,Math.min(1,(+d.lateness_min-fig3GlobalMin)/range3))))
+    .style('fill', d => {
+      const absMax = Math.max(Math.abs(fig3GlobalMin), fig3GlobalMax);
+      const t = (+d.lateness_min / absMax) * 0.5 + 0.5; 
+      return heatColor(Math.max(0, Math.min(1, t)));
+    })
     .style('opacity',0.85)
     .on('mouseover',function(event,d){
       d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.35)');
@@ -893,10 +897,9 @@ fig3PickerTrigger.addEventListener('click', e=>{e.stopPropagation();fig3PickerDr
 document.addEventListener('click', ()=>fig3PickerDropdown.classList.remove('open'));
 
 d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
-  console.log([...new Set(raw.map(d=>d.service_rte_num))].slice(0,10));
   fig3AllData=raw;
-  fig3GlobalMin=0;
-  fig3GlobalMax=d3.max(raw,d=>+d.lateness_min)||1;
+  fig3GlobalMin = d3.min(raw, d => +d.lateness_min) || 0;
+  fig3GlobalMax = d3.max(raw, d => +d.lateness_min) || 1;
   drawFig3(raw.filter(d=>d.service_rte_num=='0'));
 }).catch(err=>{
   console.warn('Fig 3 data not available:',err);
