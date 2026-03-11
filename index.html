@@ -773,7 +773,8 @@ function drawFig3(data) {
   const wrapEl=document.getElementById('heatmap-svg-wrap');
   wrapEl.innerHTML='';
   const myGroups=DAYS_LABEL;
-  const myVars=Array.from(new Set(data.map(d=>d.sched_arr_time_formatted))).sort(d3.descending);
+  const myVars=Array.from(new Set(data.map(d=>d.sched_arr_time_formatted.slice(0, 5))))
+                    .sort(d3.descending);
   if (!myVars.length) {
     wrapEl.innerHTML='<p style="color:rgba(245,240,232,0.3);font-family:DM Mono,monospace;font-size:11px;padding:40px">No data for this route.</p>';
     return;
@@ -803,6 +804,7 @@ function drawFig3(data) {
   const tip3=document.getElementById('fig3-tooltip');
 
   svg3.selectAll('rect').data(data).join('rect')
+    .attr('y', d => y3(d.sched_arr_time_formatted.slice(0, 5)))
     .attr('x',d=>x3(d.weekday)).attr('y',d=>y3(d.sched_arr_time_formatted))
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
     .style('fill',d=>heatColor(Math.max(0,Math.min(1,(+d.lateness_min-minVal)/range3))))
