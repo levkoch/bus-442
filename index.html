@@ -37,7 +37,7 @@
   .ctrl-group { display: flex; align-items: center; gap: 12px; }
 
   /* ── shared mono uppercase label (used everywhere) ── */
-  .mono-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.6; white-space: nowrap; }
+  .mono-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.8; white-space: nowrap; }
   .mono-label--bright { opacity: 1; }
 
   /* ── shared button style — base pill button ── */
@@ -52,12 +52,12 @@
 
   /* ── shared swatch strip (legend) ── */
   .swatch-strip { display: flex; align-items: center; gap: 6px; }
-  .swatch-strip-label { font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; color: var(--bg); opacity: 0.5; white-space: nowrap; }
+  .swatch-strip-label { font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; color: var(--bg); opacity: 0.8; white-space: nowrap; }
   .swatch-row { display: flex; gap: 2px; }
   .swatch { width: 16px; height: 10px; border-radius: 2px; }
 
   /* ── shared floating tooltip ── */
-  .float-tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; pointer-events: none; opacity: 0; z-index: 2000; transition: opacity 0.1s; white-space: nowrap; }
+  .float-tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; pointer-events: none; opacity: 0; z-index: 2000;  white-space: nowrap; }
 
   /* ── shared viz content padding ── */
   .viz-pad { padding: 20px 24px 24px; }
@@ -79,7 +79,7 @@
   input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
   .legend-inline { display: flex; gap: 14px; margin-left: auto; flex-shrink: 0; align-items: center; }
   .legend-item { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 9px; color: var(--bg); }
-  .legend-item span { opacity: 0.7; }
+  .legend-item span { opacity: 0.8; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
   #map-container { position: relative; width: 100%; height: 80vh; overflow: hidden; }
@@ -88,21 +88,21 @@
   #stop-svg circle { pointer-events: all; }
   #loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--border); z-index: 100; gap: 12px; }
   #loading h2 { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: #fff; letter-spacing: 1px; }
-  #loading p { font-size: 11px; color: var(--bg); font-family: 'DM Mono', monospace; opacity: 0.5; }
+  #loading p { font-size: 11px; color: var(--bg); font-family: 'DM Mono', monospace; opacity: 0.8; }
   .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Fig 1 map tooltip (wider, has route pills) */
-  #tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-size: 11px; pointer-events: none; opacity: 0; z-index: 1000; max-width: 260px; transition: opacity 0.1s; font-family: 'DM Mono', monospace; }
+  #tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-size: 11px; pointer-events: none; opacity: 0; z-index: 1000; max-width: 260px; font-family: 'DM Mono', monospace; }
   #tooltip .tt-name { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
   #tooltip .tt-routes { margin-bottom: 8px; }
   #tooltip .tt-times { color: var(--accent); font-size: 11px; line-height: 1.6; }
-  #tooltip .tt-times .no-arrivals { color: var(--bg); opacity: 0.5; }
+  #tooltip .tt-times .no-arrivals { color: var(--bg); opacity: 0.8; }
   .tt-route-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
   .tt-route-pill { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; flex-shrink: 0; line-height: 1.3; text-align: center; }
   .tt-route-pill--number { width: 32px; white-space: nowrap; }
   .tt-route-pill--named { width: 48px; white-space: normal; word-break: break-word; }
-  .tt-route-desc { font-size: 10px; color: var(--bg); opacity: 0.6; line-height: 1.3; }
+  .tt-route-desc { font-size: 10px; color: var(--bg); opacity: 0.8; line-height: 1.3; }
 
   /* ══════════════════════════════════════
      FIG 2 — Route Lateness Picker
@@ -114,15 +114,15 @@
   #rv-picker-trigger { display: flex; align-items: center; gap: 8px; background: var(--dark2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; color: var(--bg); min-height: 30px; }
   #rv-picker-trigger:hover { border-color: var(--accent); }
   #rv-picker-trigger .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
-  #rv-picker-trigger .rp-label { flex: 1; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #rv-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.4; font-size: 9px; }
+  #rv-picker-trigger .rp-label { flex: 1; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #rv-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.8; font-size: 9px; }
   #rv-picker-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--dark2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; max-height: 260px; overflow-y: auto; z-index: 500; }
   #rv-picker-dropdown.open { display: block; }
   .rp-option { display: flex; align-items: center; gap: 8px; padding: 5px 10px; cursor: pointer; color: var(--bg); font-size: 11px; }
   .rp-option:hover { background: rgba(255,255,255,0.06); }
   .rp-option.selected { background: rgba(255,110,199,0.1); }
   .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; min-width: 28px; text-align: center; }
-  .rp-desc { opacity: 0.5; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rp-desc { opacity: 0.8; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* metro line — collapses when no route selected */
   #rv-metro-line { overflow-x: hidden; overflow-y: hidden; }
@@ -132,23 +132,23 @@
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
   .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: var(--dark); flex-shrink: 0; position: relative; z-index: 1; }
   .rv-stop-node.highlighted .rv-stop-dot { background: var(--accent); border-color: var(--accent); transform: scale(1.4); }
-  .rv-stop-label { font-size: 8px; color: var(--bg); opacity: 0.5; position: absolute; bottom: 14px; left: 50%; transform-origin: bottom left; transform: rotate(-45deg); white-space: nowrap; line-height: 1; pointer-events: none; }
+  .rv-stop-label { font-size: 8px; color: var(--bg); opacity: 0.8; position: absolute; bottom: 14px; left: 50%; transform-origin: bottom left; transform: rotate(-45deg); white-space: nowrap; line-height: 1; pointer-events: none; }
   .rv-stop-node.highlighted .rv-stop-label { opacity: 1; color: var(--accent); }
-  .rv-line-seg { height: 2px; min-width: 6px; flex: 1; opacity: 0.5; margin-bottom: 4px; }
+  .rv-line-seg { height: 2px; min-width: 6px; flex: 1; opacity: 0.8; margin-bottom: 4px; }
 
   /* Fig 2 heatmap table */
   .hm-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
-  .hm-title { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.5; font-family: 'DM Mono', monospace; }
+  .hm-title { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.8; font-family: 'DM Mono', monospace; }
   #rv-heatmap-grid { overflow-x: auto; }
   .rv-hm-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-  .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.4; text-align: center; padding: 0 0 6px; font-weight: 400; }
+  .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.8; text-align: center; padding: 0 0 6px; font-weight: 400; }
   .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rv-hm-table td { padding: 1px; }
   .rv-hm-table td:first-child { padding-right: 8px; }
-  .rv-hm-cell { width: 100%; height: 16px; border-radius: 2px; cursor: default; display: block; transition: opacity 0.1s; }
+  .rv-hm-cell { width: 100%; height: 16px; border-radius: 2px; cursor: default; display: block; }
   .rv-hm-cell:hover { opacity: 0.8; outline: 1px solid rgba(255,255,255,0.3); }
-  .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 180px; overflow: hidden; text-overflow: ellipsis; }
-  #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.4; font-family: 'DM Mono', monospace; }
+  .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.8; text-align: right; padding-right: 8px; white-space: nowrap; width: 180px; overflow: hidden; text-overflow: ellipsis; }
+  #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.8; font-family: 'DM Mono', monospace; }
 
     /* ══════════════════════════════════════
      FIG 3 — Average Delay Heatmap
@@ -156,8 +156,8 @@
   #fig3-picker { position: relative; min-width: 220px; font-family: 'DM Mono', monospace; font-size: 11px; user-select: none; }
   #fig3-picker-trigger { display: flex; align-items: center; gap: 8px; background: var(--dark2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; color: var(--bg); min-height: 30px; }
   #fig3-picker-trigger:hover { border-color: var(--accent); }
-  #fig3-picker-trigger .rp-label { flex: 1; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #fig3-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.4; font-size: 9px; }
+  #fig3-picker-trigger .rp-label { flex: 1; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #fig3-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.8; font-size: 9px; }
   #fig3-picker-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--dark2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; max-height: 260px; overflow-y: auto; z-index: 500; }
   #fig3-picker-dropdown.open { display: block; }
 </style>
@@ -221,7 +221,7 @@
 
   <div class="article-text">
     <div class="article-body">
-      <p>However, despite King County Metro's best efforts, buses run late, and students are left stranded or late to class. We investigated arrival patterns to find which routes and times are more often late. Some routes arrive consistently late or early, leading to discrepancies between posted and actual arrival times.</p> 
+      <p>However, despite King County Metro's best efforts, buses run late, and students are left stranded or late to class. We investigated arrival patterns for the entirety of 2023 to find which routes and times are more often late. Some routes arrive consistently late or early, leading to discrepancies between posted and actual arrival times.</p> 
       <p>Bus schedules could possibly be adjusted to accomodate for these differences, so that riders can have a more consistent experience with bus arrivals.</p>
     </div>
   </div>
@@ -463,7 +463,7 @@ function showRouteLines(stop) {
         return `${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`;
       }).join(' ');
       linesG.append('path').attr('d', pathStr).attr('fill', 'none').attr('stroke', color)
-        .attr('stroke-width', 2.5).attr('stroke-opacity', 0.85)
+        .attr('stroke-width', 2.5).attr('stroke-opacity', 0.8)
         .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('pointer-events', 'none');
     });
   });
@@ -649,7 +649,7 @@ function populateRouteSelect() {
   pickerDropdown.innerHTML='';
   const blank=document.createElement('div');
   blank.className='rp-option'; blank.dataset.routeId='';
-  blank.innerHTML=`<span class="rp-label" style="opacity:0.4">Select a Route</span>`;
+  blank.innerHTML=`<span class="rp-label" style="opacity:0.8">Select a Route</span>`;
   blank.addEventListener('click', e=>{e.stopPropagation();setPickerRoute('');});
   pickerDropdown.appendChild(blank);
 
@@ -885,7 +885,7 @@ function drawFig3(data) {
       const t = (+d.lateness_min / absMax) * 0.5 + 0.5;
       return heatColor(Math.max(0, Math.min(1, t)));
     })
-    .style('opacity',0.85)
+    .style('opacity',0.8)
     .on('mouseover',function(event,d){
       d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.35)');
       const secs = Math.round(+d.lateness_min * 60);
@@ -899,7 +899,7 @@ function drawFig3(data) {
       tip3.style.left=(event.clientX+12)+'px'; tip3.style.top=(event.clientY-28)+'px';
     })
     .on('mouseleave',function(){
-      d3.select(this).style('opacity',0.85).style('outline','none');
+      d3.select(this).style('opacity',0.8).style('outline','none');
       tip3.style.opacity=0;
     });
 }
