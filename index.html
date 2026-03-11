@@ -28,7 +28,7 @@
   /* ── viz shells ── */
   .viz-block { max-width: 90%; margin: 56px auto; }
   .viz-caption { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-top: 12px; text-align: center; }
-  .viz-shell { border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 4px 32px rgba(0,0,0,0.12); background: var(--border); }
+  .viz-shell { border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 4px 32px rgba(0,0,0,0.2); background: var(--border); }
   .viz-shell--dark { background: var(--dark); color: var(--bg); font-family: 'DM Mono', monospace; }
 
   /* ── shared dark control bar (used by all three figs) ── */
@@ -221,7 +221,7 @@
 
   <div class="article-text">
     <div class="article-body">
-      <p>However, despite King County Metro's best efforts, buses run late, and students are left stranded or late to class. We investigated arrival patterns for the entirety of 2023 to find which routes and times are more often late. Some routes arrive consistently late or early, leading to discrepancies between posted and actual arrival times.</p> 
+      <p>However, despite King County Metro's best efforts, buses run late, and students are left stranded or late to class. We investigated arrival patterns for the entirety of 2023 to find which routes and times are more often late. Some routes arrive consistently late or early, leading to discrepancies between scheduled and actual arrival times.</p> 
       <p>Bus schedules could possibly be adjusted to accomodate for these differences, so that riders can have a more consistent experience with bus arrivals.</p>
     </div>
   </div>
@@ -501,7 +501,7 @@ function drawStops() {
           const pillClass = isNumber ? 'tt-route-pill tt-route-pill--number' : 'tt-route-pill tt-route-pill--named';
           const lineColor = currentRouteLineColors[routeId];
           return `<div class="tt-route-row">
-            <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${lineColor};flex-shrink:0;border:1px solid rgba(255,255,255,0.25);"></span>
+            <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${lineColor};flex-shrink:0;border:1px solid rgba(255,255,255,0.3);"></span>
             <span class="${pillClass}" style="background:${color};${textcolor}">${route.short_name}</span>
             <span class="tt-route-desc">${desc}</span>
           </div>`;
@@ -864,10 +864,10 @@ function drawFig3(data) {
 
   // generate axes and then remove how they are rendered.
   svg3.append('g').attr('transform',`translate(0,${H3})`).call(d3.axisBottom(x3).tickSize(0)).attr('dy', '1.8em')
-    .selectAll('text').style('fill','rgba(245,240,232,0.5)').style('font-size','9px').style('font-family',"'DM Mono',monospace");
+    .selectAll('text').style('fill','rgba(245,240,232,0.8)').style('font-size','9px').style('font-family',"'DM Mono',monospace");
   svg3.append('g').call(d3.axisLeft(y3).tickSize(0))
     .selectAll('text')
-    .style('fill','rgba(245,240,232,0.4)').style('font-size','8px').style('font-family',"'DM Mono',monospace")
+    .style('fill','rgba(245,240,232,0.8)').style('font-size','8px').style('font-family',"'DM Mono',monospace")
     .style('display', d => d.endsWith(':00') ? null : 'none');
   svg3.selectAll('.domain, .tick line').remove();
 
@@ -887,7 +887,7 @@ function drawFig3(data) {
     })
     .style('opacity',0.8)
     .on('mouseover',function(event,d){
-      d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.35)');
+      d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.8)');
       const secs = Math.round(+d.lateness_min * 60);
       const sign = secs < 0 ? 'Early' : 'Late';
       tip3.textContent = `${formatDelay(Math.abs(secs))} ${sign} `
@@ -913,7 +913,7 @@ d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
   drawFig3(raw.filter(d=>d.service_rte_num=='0'));
 }).catch(err=>{
   console.warn('Fig 3 data not available:',err);
-  document.getElementById('heatmap-svg-wrap').innerHTML='<p style="color:rgba(245,240,232,0.3);font-family:DM Mono,monospace;font-size:11px;padding:40px">Data file not found.</p>';
+  document.getElementById('heatmap-svg-wrap').innerHTML='<p style="color:rgba(245,240,232,0.8);font-family:DM Mono,monospace;font-size:11px;padding:40px">Data file not found.</p>';
 });
 </script>
 </body>
