@@ -6,6 +6,7 @@
 <title>The Bus Curse: Investigating King County Bus Lateness</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link rel="icon" href="favicon.ico" type="image/x-icon"/>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -298,6 +299,7 @@
   <hr class="section-rule">
   <div class="article-body" style="font-size:14px; line-height:1.9;">
     <p class="sources-p"> This project was made possible by multiple data sources. King County Metro GTFS transit data via <a href="https://www.soundtransit.org/GTFS-KCM/google_transit.zip">Sound Transit</a>. Data processing approach inspired by <a href="https://github.com/mattmakesmaps/gtfs-exploration/blob/main/notebooks/kc_metro/data-exploration-and-mapping.ipynb">mattmakesmaps/gtfs-exploration</a>. Lateness data from King County, requested by <a href="https://github.com/rfoxall3/seattle_bus_data_project">rfoxall3/seattle_bus_data_project</a>, available on <a href="https://drive.google.com/drive/folders/10L4VCDBqzbiX8hn5lLf72s7h0LZjxbg-">Google Drive</a>. UW transportation statistics: <a href="https://sustainability.uw.edu/plan/dashboard/target-7-transportation">UW Sustainability Dashboard</a>. King County Metro overview: <a href="https://kingcounty.gov/en/dept/metro/travel-options/bus">kingcounty.gov</a>.</p>
+    <p class="sources-p">The code for this article's visualizations were created with the help of Anthropic's <a href="https://claude.ai">Claude</a> model to assist with debugging and styling. The favicon was recolored from work by <a href="https://commons.wikimedia.org/wiki/File:Bus-logo.svg">cecile.nicola on WikiMedia</a>.</p>
   </div>
 </div>
 
@@ -793,8 +795,8 @@ function drawFig3(data) {
     wrapEl.innerHTML='<p style="color:rgba(245,240,232,0.3);font-family:DM Mono,monospace;font-size:11px;padding:40px">No data for this route.</p>';
     return;
   }
-  const containerW=(wrapEl.parentElement.clientWidth||900)-margin3.left-margin3.right;
-  const cellH=2;
+  const containerW = (wrapEl.parentElement.clientWidth || 900) - margin3.left - margin3.right - 48;
+  const cellH=1;
   const H3=myVars.length*(cellH+1);
 
   const svg3=d3.select(wrapEl).append('svg')
