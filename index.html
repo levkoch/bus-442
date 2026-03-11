@@ -743,11 +743,11 @@ function renderHeatmap(routeId) {
 
   const table=document.createElement('table'); table.className='rv-hm-table';
   const thead=document.createElement('thead'), headerRow=document.createElement('tr');
-  const cornerTh=document.createElement('th'); cornerTh.className='rv-stop-th'; cornerTh.textContent='Stop';
+  const cornerTh=document.createElement('th'); cornerTh.className='rv-stop-th'; cornerTh.textContent='STOP';
   headerRow.appendChild(cornerTh);
   for (let h=4;h<24;h++) {
     const th=document.createElement('th');
-    th.textContent=h<12?`${h}a`:h===12?'12p':`${h-12}p`;
+    th.textContent=h<12?`${h}A`:h===12?'12P':`${h-12}P`;
     headerRow.appendChild(th);
   }
   thead.appendChild(headerRow); table.appendChild(thead);
@@ -864,7 +864,8 @@ function drawFig3(data) {
 
   // generate axes and then remove how they are rendered.
   svg3.append('g').attr('transform',`translate(0,${H3})`).call(d3.axisBottom(x3).tickSize(0)).attr('dy', '1.8em')
-    .selectAll('text').style('fill','rgba(245,240,232,0.8)').style('font-size','9px').style('font-family',"'DM Mono',monospace");
+    .selectAll('text').style('fill','rgba(245,240,232,0.8)').style('font-size','9px')
+    .style('text-transform', 'uppercase').style('font-family',"'DM Mono',monospace");
   svg3.append('g').call(d3.axisLeft(y3).tickSize(0))
     .selectAll('text')
     .style('fill','rgba(245,240,232,0.8)').style('font-size','8px').style('font-family',"'DM Mono',monospace")
