@@ -150,14 +150,16 @@
   .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 180px; overflow: hidden; text-overflow: ellipsis; }
   #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.4; font-family: 'DM Mono', monospace; }
 
-  /* ══════════════════════════════════════
+    /* ══════════════════════════════════════
      FIG 3 — Average Delay Heatmap
   ══════════════════════════════════════ */
-  #fig3-route-select { font-family: 'DM Mono', monospace; font-size: 10px; background: var(--dark2); border: 1px solid var(--border); color: var(--bg); padding: 4px 8px; border-radius: 3px; cursor: pointer; }
-  #fig3-route-select:focus { outline: none; border-color: var(--accent); }
-  #heatmap-svg-wrap svg .tick text { fill: rgba(245,240,232,0.45); font-size: 9px; font-family: 'DM Mono', monospace; }
-  #heatmap-svg-wrap svg .domain { display: none; }
-  #heatmap-svg-wrap svg .tick line { display: none; }
+  #fig3-picker { position: relative; min-width: 220px; font-family: 'DM Mono', monospace; font-size: 11px; user-select: none; }
+  #fig3-picker-trigger { display: flex; align-items: center; gap: 8px; background: var(--dark2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; color: var(--bg); min-height: 30px; }
+  #fig3-picker-trigger:hover { border-color: var(--accent); }
+  #fig3-picker-trigger .rp-label { flex: 1; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #fig3-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.4; font-size: 9px; }
+  #fig3-picker-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--dark2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; max-height: 260px; overflow-y: auto; z-index: 500; }
+  #fig3-picker-dropdown.open { display: block; }
 </style>
 </head>
 <body>
@@ -229,10 +231,10 @@
     <div class="viz-shell viz-shell--dark">
       <div id="rv-header">
         <div id="rv-header-top">
-          <select id="rv-route-select"><option value="">— select a route —</option></select>
+          <select id="rv-route-select"><option value="">Select a Route</option></select>
           <div id="rv-route-picker">
             <div id="rv-picker-trigger">
-              <span class="rp-label">— select a route —</span>
+              <span class="rp-label">Select a Route</span>
               <span class="rp-arrow">▾</span>
             </div>
             <div id="rv-picker-dropdown"></div>
@@ -279,8 +281,13 @@
   <div class="viz-block">
     <div class="viz-shell viz-shell--dark">
       <div class="ctrl-bar">
-        <span class="mono-label mono-label--bright">Route</span>
-        <select id="fig3-route-select"><option value="0">All routes</option></select>
+        <div id="fig3-picker">
+          <div id="fig3-picker-trigger">
+            <span class="rp-label">All routes</span>
+            <span class="rp-arrow">&#9662;</span>
+          </div>
+          <div id="fig3-picker-dropdown"></div>
+        </div>
         <div class="swatch-strip" style="margin-left:auto">
           <span class="swatch-strip-label">Least late</span>
           <div class="swatch-row" id="fig3-swatches"></div>
@@ -291,7 +298,7 @@
         <div id="heatmap-svg-wrap"></div>
       </div>
     </div>
-    <div class="viz-caption">Fig. 3 — Average Delay (min) by Time of Day &amp; Weekday</div>
+    <div class="viz-caption">Fig. 3 — Average Delay (Minutes) by Time of Day &amp; Weekday</div>
   </div>
 
   <!-- sources -->
@@ -785,18 +792,32 @@ buildSwatchStrip('fig3-swatches', 13);
 const DAYS_LABEL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const margin3={top:20, right:20, bottom:36, left:58};
 
+let fig3GlobalMin=0, fig3GlobalMax=1;
+let fig3CurrentRoute='0';
+
+function setFig3Route(rte, label) {
+  fig3CurrentRoute = rte;
+  const trigger = document.getElementById('fig3-picker-trigger');
+  trigger.innerHTML = `<span class="rp-label">${label}</span><span class="rp-arrow">&#9662;</span>`;
+  document.querySelectorAll('#fig3-picker-dropdown .rp-option').forEach(el =>
+    el.classList.toggle('selected', el.dataset.rte === rte));
+  document.getElementById('fig3-picker-dropdown').classList.remove('open');
+  drawFig3(fig3AllData.filter(d => d.service_rte_num == rte));
+}
+
 function drawFig3(data) {
   const wrapEl=document.getElementById('heatmap-svg-wrap');
   wrapEl.innerHTML='';
+
+  const allTimes=[];
+  for (let h=0;h<24;h++)
+    for (let m=0;m<60;m+=5)
+      allTimes.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+  const myVars=allTimes.reverse();
+
   const myGroups=DAYS_LABEL;
-  const myVars=Array.from(new Set(data.map(d=>d.sched_arr_time_formatted.slice(0, 5))))
-                    .sort(d3.descending);
-  if (!myVars.length) {
-    wrapEl.innerHTML='<p style="color:rgba(245,240,232,0.3);font-family:DM Mono,monospace;font-size:11px;padding:40px">No data for this route.</p>';
-    return;
-  }
-  const containerW = (wrapEl.parentElement.clientWidth || 900) - margin3.left - margin3.right - 48;
-  const cellH=1;
+  const containerW=(wrapEl.parentElement.clientWidth||900)-margin3.left-margin3.right-48;
+  const cellH=2;
   const H3=myVars.length*(cellH+1);
 
   const svg3=d3.select(wrapEl).append('svg')
@@ -814,20 +835,18 @@ function drawFig3(data) {
     .style('fill','rgba(245,240,232,0.4)').style('font-size','8px').style('font-family',"'DM Mono',monospace")
     .style('display', d => d.endsWith(':00') ? null : 'none');
 
-  const minVal=d3.min(data,d=>+d.lateness_min)||0;
-  const maxVal=d3.max(data,d=>+d.lateness_min)||1;
-  const range3=maxVal-minVal||1;
+  const range3 = fig3GlobalMax - fig3GlobalMin || 1;
   const tip3=document.getElementById('fig3-tooltip');
 
   svg3.selectAll('rect').data(data).join('rect')
-    .attr('x', d => x3(d.weekday))
-    .attr('y', d => y3(d.sched_arr_time_formatted.slice(0, 5)))
+    .attr('x',d=>x3(d.weekday))
+    .attr('y',d=>y3(d.sched_arr_time_formatted.slice(0,5)))
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
-    .style('fill',d=>heatColor(Math.max(0,Math.min(1,(+d.lateness_min-minVal)/range3))))
+    .style('fill',d=>heatColor(Math.max(0,Math.min(1,(+d.lateness_min-fig3GlobalMin)/range3))))
     .style('opacity',0.85)
     .on('mouseover',function(event,d){
       d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.35)');
-      tip3.textContent=`${d.weekday} · ${d.sched_arr_time_formatted} · ${(+d.lateness_min).toFixed(2)} min avg delay`;
+      tip3.textContent=`${d.weekday} · ${d.sched_arr_time_formatted.slice(0,5)} · ${(+d.lateness_min).toFixed(2)} min avg delay`;
       tip3.style.opacity=1;
       tip3.style.left=(event.clientX+12)+'px'; tip3.style.top=(event.clientY-28)+'px';
     })
@@ -841,23 +860,32 @@ function drawFig3(data) {
 }
 
 let fig3AllData=[];
+const fig3PickerTrigger=document.getElementById('fig3-picker-trigger');
+const fig3PickerDropdown=document.getElementById('fig3-picker-dropdown');
+fig3PickerTrigger.addEventListener('click', e=>{e.stopPropagation();fig3PickerDropdown.classList.toggle('open');});
+document.addEventListener('click', ()=>fig3PickerDropdown.classList.remove('open'));
+
 d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
   fig3AllData=raw;
+  fig3GlobalMin=d3.min(raw,d=>+d.lateness_min)||0;
+  fig3GlobalMax=d3.max(raw,d=>+d.lateness_min)||1;
+
   const routes=[...new Set(raw.map(d=>d.service_rte_num))].sort((a,b)=>+a-+b);
-  const sel=document.getElementById('fig3-route-select'); sel.innerHTML='';
+  fig3PickerDropdown.innerHTML='';
   for (const r of routes) {
-    const opt=document.createElement('option'); opt.value=r;
-    opt.textContent=r=='0'?'All routes':`Route ${r}`;
-    sel.appendChild(opt);
+    const label = r=='0' ? 'All routes' : `Route ${r}`;
+    const div=document.createElement('div');
+    div.className='rp-option'; div.dataset.rte=r;
+    if (r=='0') div.classList.add('selected');
+    div.innerHTML=`<span class="rp-label">${label}</span>`;
+    div.addEventListener('click', e=>{e.stopPropagation(); setFig3Route(r, label);});
+    fig3PickerDropdown.appendChild(div);
   }
-  drawFig3(fig3AllData.filter(d=>d.service_rte_num=='0'));
+
+  drawFig3(raw.filter(d=>d.service_rte_num=='0'));
 }).catch(err=>{
   console.warn('Fig 3 data not available:',err);
   document.getElementById('heatmap-svg-wrap').innerHTML='<p style="color:rgba(245,240,232,0.3);font-family:DM Mono,monospace;font-size:11px;padding:40px">Data file not found.</p>';
-});
-
-document.getElementById('fig3-route-select').addEventListener('change',function(){
-  drawFig3(fig3AllData.filter(d=>d.service_rte_num==this.value));
 });
 </script>
 </body>
