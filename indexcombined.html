@@ -133,11 +133,9 @@
 
   /* Fig 2 inline legend */
   .rv-legend-strip { display: flex; align-items: center; gap: 6px; }
-  .rv-legend-strip-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.45; white-space: nowrap; }
+  .rv-legend-strip-label { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--bg); white-space: nowrap; }
   .rv-swatch-row { display: flex; gap: 2px; }
   .rv-swatch { width: 16px; height: 10px; border-radius: 2px; }
-  .rv-legend-range { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.35; margin-left: 4px; }
-
   /* heatmap tooltip */
   #hm-tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; pointer-events: none; opacity: 0; z-index: 2000; transition: opacity 0.1s; white-space: nowrap; }
 
@@ -258,18 +256,17 @@
 
       <div id="rv-heatmap">
         <div class="rv-heatmap-header">
-          <span class="rv-heatmap-title">Avg delay (sec) by stop &times; hour of day</span>
+          <span class="rv-heatmap-title">Average Arrival Delays</span>
           <div class="rv-legend-strip" id="rv-legend-strip" style="display:none">
             <span class="rv-legend-strip-label">Early</span>
             <div class="rv-swatch-row" id="rv-legend-swatches"></div>
             <span class="rv-legend-strip-label">Late</span>
-            <span class="rv-legend-range" id="rv-legend-range"></span>
           </div>
         </div>
         <div id="rv-heatmap-grid"><div id="rv-no-data">Select a route above to explore delay patterns.</div></div>
       </div>
     </div>
-    <div class="viz-caption">Fig. 2 — Lateness Heatmap by Route, Stop &amp; Hour</div>
+    <div class="viz-caption">Fig. 2 — Bus Lateness by Route, Stop &amp; Hour</div>
   </div>
 
   <div class="article-text">
@@ -664,7 +661,6 @@ function renderMetroLine(routeId) {
 function buildRv2Legend(maxAbs) {
   const strip=document.getElementById('rv-legend-strip');
   const swatchEl=document.getElementById('rv-legend-swatches');
-  const rangeEl=document.getElementById('rv-legend-range');
   strip.style.display='flex';
   swatchEl.innerHTML='';
   const steps=13;
@@ -678,7 +674,6 @@ function buildRv2Legend(maxAbs) {
     swatchEl.appendChild(sw);
   }
   const secs=Math.round(maxAbs), mm=Math.floor(secs/60), ss=secs%60;
-  rangeEl.textContent=`±${mm}m${ss>0?' '+ss+'s':''} max`;
 }
 
 function renderHeatmap(routeId) {
@@ -834,7 +829,6 @@ function drawFig3(data) {
 
   svg3.selectAll('rect').data(data).join('rect')
     .attr('x',d=>x3(d.weekday)).attr('y',d=>y3(d.sched_arr_time_formatted))
-    .attr('rx',2).attr('ry',2)
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
     .style('fill',d=>fig3Color(Math.max(0,Math.min(1,(+d.lateness_min-minVal)/range3))))
     .style('opacity',0.85)
