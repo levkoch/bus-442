@@ -61,6 +61,11 @@
   /* ── shared viz content padding ── */
   .viz-pad { padding: 20px 24px 24px; }
 
+  /* -- sources formatting -- */
+  .sources-p::first-letter { all: unset; }
+  .article-body a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); opacity: 0.8; }
+  .article-body a:hover { opacity: 1; }
+
   /* ══════════════════════════════════════
      FIG 1 — Map
   ══════════════════════════════════════ */
@@ -286,6 +291,17 @@
     </div>
     <div class="viz-caption">Fig. 3 — Average Delay (min) by Time of Day &amp; Weekday</div>
   </div>
+
+  <!-- sources -->
+  <div class="article-text" style="margin-top: 80px;">
+  <hr class="section-rule">
+  <div class="article-label">Sources &amp; Acknowledgments</div>
+  <div class="article-body" style="font-size:14px; line-height:1.9;">
+    <p class="sources-p">King County Metro GTFS transit data via <a href="https://www.soundtransit.org/GTFS-KCM/google_transit.zip">Sound Transit</a>. Data processing approach inspired by <a href="https://github.com/mattmakesmaps/gtfs-exploration/blob/main/notebooks/kc_metro/data-exploration-and-mapping.ipynb">mattmakesmaps/gtfs-exploration</a>.</p>
+    <p class="sources-p">Lateness data from King County, requested by <a href="https://github.com/rfoxall3/seattle_bus_data_project">rfoxall3/seattle_bus_data_project</a>, available on <a href="https://drive.google.com/drive/folders/10L4VCDBqzbiX8hn5lLf72s7h0LZjxbg-">Google Drive</a>.</p>
+    <p class="sources-p">UW transportation statistics: <a href="https://sustainability.uw.edu/plan/dashboard/target-7-transportation">UW Sustainability Dashboard</a>. King County Metro overview: <a href="https://kingcounty.gov/en/dept/metro/travel-options/bus">kingcounty.gov</a>.</p>
+  </div>
+</div>
 
 </div><!-- end article-wrap -->
 
