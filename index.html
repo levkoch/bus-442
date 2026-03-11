@@ -820,8 +820,6 @@ buildSwatchStrip('fig3-swatches', 13);
 const DAYS_LABEL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const margin3={top:20, right:20, bottom:36, left:58};
 
-fig3GlobalMin = 0;
-fig3GlobalMax = d3.max(raw, d => +d.lateness_min) || 1;
 let fig3CurrentRoute='0';
 
 function setFig3Route(rte, labelHTML) {
