@@ -283,15 +283,15 @@
       <div class="ctrl-bar">
         <div id="fig3-picker">
           <div id="fig3-picker-trigger">
-            <span class="rp-label">All routes</span>
+            <span class="rp-label">All Routes</span>
             <span class="rp-arrow">&#9662;</span>
           </div>
           <div id="fig3-picker-dropdown"></div>
         </div>
         <div class="swatch-strip" style="margin-left:auto">
-          <span class="swatch-strip-label">Least late</span>
+          <span class="swatch-strip-label">Most Early</span>
           <div class="swatch-row" id="fig3-swatches"></div>
-          <span class="swatch-strip-label">Most late</span>
+          <span class="swatch-strip-label">Most Late</span>
         </div>
       </div>
       <div class="viz-pad">
@@ -851,7 +851,7 @@ function drawFig3(data) {
 
   const myGroups=DAYS_LABEL;
   const containerW=(wrapEl.parentElement.clientWidth||900)-margin3.left-margin3.right-48;
-  const cellH=2;
+  const cellH=1;
   const H3=myVars.length*(cellH+1);
 
   const svg3=d3.select(wrapEl).append('svg')
