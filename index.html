@@ -888,7 +888,10 @@ function drawFig3(data) {
     .style('opacity',0.85)
     .on('mouseover',function(event,d){
       d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.35)');
-      tip3.textContent=`${d.weekday} · ${d.sched_arr_time_formatted.slice(0,5)} · ${(+d.lateness_min).toFixed(2)} min avg delay`;
+      tip3.textContent = (+d.lateness_min > 0 
+                              ? `${(+d.lateness_min).toFixed(2)} min late` 
+                              : `${(d.lateness_min * -1.0).toFixed(2)} min early`)
+                       + `· ${d.weekday} · ${d.sched_arr_time_formatted.slice(0,5)}`;
       tip3.style.opacity=1;
       tip3.style.left=(event.clientX+12)+'px'; tip3.style.top=(event.clientY-28)+'px';
     })
