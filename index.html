@@ -808,6 +808,8 @@ async function loadLatenessData() {
     populateRouteSelect();
   } catch(e) { console.warn('Lateness data not available:', e.message); }
 }
+const fig3PickerTrigger=document.getElementById('fig3-picker-trigger');
+const fig3PickerDropdown=document.getElementById('fig3-picker-dropdown');
 loadLatenessData();
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -887,8 +889,6 @@ function drawFig3(data) {
 }
 
 let fig3AllData=[];
-const fig3PickerTrigger=document.getElementById('fig3-picker-trigger');
-const fig3PickerDropdown=document.getElementById('fig3-picker-dropdown');
 fig3PickerTrigger.addEventListener('click', e=>{e.stopPropagation();fig3PickerDropdown.classList.toggle('open');});
 document.addEventListener('click', ()=>fig3PickerDropdown.classList.remove('open'));
 
