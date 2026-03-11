@@ -20,7 +20,7 @@
   h1.article-title em { font-style: italic; color: var(--accent); }
   .article-byline { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-bottom: 40px; padding-bottom: 28px; border-bottom: 1px solid var(--rule); }
   .article-body p { font-size: 18px; font-weight: 300; line-height: 1.8; color: var(--ink); margin-bottom: 24px; }
-  .article-body p:first-child::first-letter { font-family: 'Playfair Display', serif; font-size: 72px; font-weight: 700; float: left; line-height: 0.75; margin-right: 8px; margin-top: -2px; color: var(--accent); }
+  .article-body p.drop-cap::first-letter { font-family: 'Playfair Display', serif; font-size: 72px; font-weight: 700; float: left; line-height: 0.75; margin-right: 8px; margin-top: -2px; color: var(--accent); }
   .article-body p strong { font-weight: 400; color: var(--ink); border-bottom: 1px solid var(--accent); }
   hr.section-rule { border: none; border-top: 1px solid var(--rule); margin: 40px 0; }
 
@@ -160,7 +160,7 @@
     <h1 class="article-title">The Bus Curse:<br><em>Investigating King County Bus Lateness</em></h1>
     <div class="article-byline">By Lev Kochergin &amp; Sonya Outhred&nbsp;·&nbsp;March 16, 2026</div>
     <div class="article-body">
-      <p>Every commuter student at the University of Washington can relate to the bus curse: it seems that regardless of when you arrive to the bus stop, the universe will force you to wait ten minutes before you get picked up to your destination. We wanted to investigate whether it was us or the time schedules going crazy.</p>
+      <p class="drop-cap">Every commuter student at the University of Washington can relate to the bus curse: it seems that regardless of when you arrive to the bus stop, the universe will force you to wait ten minutes before you get picked up to your destination. We wanted to investigate whether it was us or the time schedules going crazy.</p>
       <p>The University of Washington has been a major supporter of the public transportation system, with a goal of only 12% of students driving alone to campus by 2028 as part of sustainability efforts. Students automatically recieve transportation access for $73 a quarter as part of the mandatory U-PASS program when registering for classes. The university also covers the U-PASS program for it's employees, which help it achieve one of the lowest drive-alone rates in the country for a major university.</p>
       <p>King County Metro, which operates most of the public transport modes in the region and uses the University as a hub for numerous buslines, has created a robust public transportation offering in the region. It includes 139 bus routes, 2 street cars, and even 2 water taxi routes. Of the bus routes, the system features 8 RapidRide rapid transit busses, Dial-A-Ride services for low-density suburban communities, and express routes to connect park &amp; ride locations with major job centers.</p>
     </div>
