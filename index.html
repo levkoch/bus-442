@@ -10,7 +10,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #f5f0e8; --ink: #1a1610; --muted: #78746f; --rule: #d4cbbf;
-    --accent: #FF6EC7; --border: #1e2330;
+    --accent: #FF6EC7; --border: #1e2330; --dark: #0d1017; --dark2: #1a1f2e;
   }
   html { background: var(--bg); color: var(--ink); font-family: 'Source Serif 4', Georgia, serif; }
   body { min-height: 100vh; }
@@ -29,17 +29,42 @@
   .viz-block { max-width: 90%; margin: 56px auto; }
   .viz-caption { font-family: 'DM Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-top: 12px; text-align: center; }
   .viz-shell { border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 4px 32px rgba(0,0,0,0.12); background: var(--border); }
+  .viz-shell--dark { background: var(--dark); color: var(--bg); font-family: 'DM Mono', monospace; }
+
+  /* ── shared dark control bar (used by all three figs) ── */
+  .ctrl-bar { background: rgba(11,14,20,0.97); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .ctrl-bar--gap32 { gap: 32px; }
+  .ctrl-group { display: flex; align-items: center; gap: 12px; }
+
+  /* ── shared mono uppercase label (used everywhere) ── */
+  .mono-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.6; white-space: nowrap; }
+  .mono-label--bright { opacity: 1; }
+
+  /* ── shared button style — base pill button ── */
+  .pill-btn { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; padding: 5px 8px; border: 1px solid var(--border); background: transparent; color: var(--bg); border-radius: 2px; cursor: pointer; transition: all 0.15s; }
+  .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .pill-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 500; }
+  /* compact variant used in Fig 2 day/mode filters */
+  .pill-btn--sm { padding: 4px 7px; opacity: 0.5; }
+  .pill-btn--sm.active { background: rgba(255,110,199,0.2); color: var(--accent); opacity: 1; }
+  .pill-btn--mode { padding: 4px 10px; letter-spacing: 1px; opacity: 0.6; }
+  .pill-btn--mode.active { background: var(--accent); border-color: var(--accent); color: #000; opacity: 1; }
+
+  /* ── shared swatch strip (legend) ── */
+  .swatch-strip { display: flex; align-items: center; gap: 6px; }
+  .swatch-strip-label { font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; color: var(--bg); opacity: 0.45; white-space: nowrap; }
+  .swatch-row { display: flex; gap: 2px; }
+  .swatch { width: 16px; height: 10px; border-radius: 2px; }
+
+  /* ── shared floating tooltip ── */
+  .float-tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; pointer-events: none; opacity: 0; z-index: 2000; transition: opacity 0.1s; white-space: nowrap; }
+
+  /* ── shared viz content padding ── */
+  .viz-pad { padding: 20px 24px 24px; }
 
   /* ══════════════════════════════════════
-     FIG 1 — Map controls
+     FIG 1 — Map
   ══════════════════════════════════════ */
-  #controls { background: rgba(11,14,20,0.97); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
-  .ctrl-group { display: flex; align-items: center; gap: 12px; }
-  .control-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); white-space: nowrap; }
-  #day-selector { display: flex; gap: 3px; }
-  .day-btn { background: transparent; border: 1px solid var(--border); color: var(--bg); font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; padding: 5px 8px; cursor: pointer; border-radius: 2px; transition: all 0.15s; }
-  .day-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .day-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 500; }
   .ctrl-divider { width: 1px; height: 28px; background: var(--border); flex-shrink: 0; }
   #time-display { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent); letter-spacing: -0.5px; white-space: nowrap; min-width: 56px; }
   .slider-wrap { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 160px; }
@@ -52,7 +77,6 @@
   .legend-item span { opacity: 0.7; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-  /* map */
   #map-container { position: relative; width: 100%; height: 80vh; overflow: hidden; }
   #tile-canvas { position: absolute; inset: 0; }
   #stop-svg { position: absolute; inset: 0; pointer-events: none; }
@@ -63,7 +87,7 @@
   .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Fig 1 tooltip */
+  /* Fig 1 map tooltip (wider, has route pills) */
   #tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; font-size: 11px; pointer-events: none; opacity: 0; z-index: 1000; max-width: 260px; transition: opacity 0.1s; font-family: 'DM Mono', monospace; }
   #tooltip .tt-name { font-family: 'Playfair Display', serif; font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
   #tooltip .tt-routes { margin-bottom: 8px; }
@@ -78,86 +102,56 @@
   /* ══════════════════════════════════════
      FIG 2 — Route Lateness Picker
   ══════════════════════════════════════ */
-  #route-viz-block { max-width: 90%; margin: 40px auto 56px; }
-  .route-viz-shell { border-radius: 12px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 4px 32px rgba(0,0,0,0.12); background: #0d1017; color: var(--bg); font-family: 'DM Mono', monospace; }
-
   #rv-header { padding: 18px 24px 0; border-bottom: 1px solid var(--border); }
   #rv-header-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
   #rv-route-select { display: none; }
   #rv-route-picker { position: relative; min-width: 220px; font-family: 'DM Mono', monospace; font-size: 11px; user-select: none; }
-  #rv-picker-trigger { display: flex; align-items: center; gap: 8px; background: #1a1f2e; border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; color: var(--bg); min-height: 30px; }
+  #rv-picker-trigger { display: flex; align-items: center; gap: 8px; background: var(--dark2); border: 1px solid var(--border); border-radius: 4px; padding: 5px 10px; cursor: pointer; color: var(--bg); min-height: 30px; }
   #rv-picker-trigger:hover { border-color: var(--accent); }
   #rv-picker-trigger .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
   #rv-picker-trigger .rp-label { flex: 1; opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #rv-picker-trigger .rp-arrow { margin-left: auto; opacity: 0.4; font-size: 9px; }
-  #rv-picker-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #1a1f2e; border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; max-height: 260px; overflow-y: auto; z-index: 500; }
+  #rv-picker-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--dark2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 4px 4px; max-height: 260px; overflow-y: auto; z-index: 500; }
   #rv-picker-dropdown.open { display: block; }
   .rp-option { display: flex; align-items: center; gap: 8px; padding: 5px 10px; cursor: pointer; color: var(--bg); font-size: 11px; }
   .rp-option:hover { background: rgba(255,255,255,0.06); }
   .rp-option.selected { background: rgba(255,110,199,0.1); }
   .rp-option .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; min-width: 28px; text-align: center; }
   .rp-option .rp-desc { opacity: 0.5; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .rv-day-mode { display: flex; gap: 4px; }
-  .rv-mode-btn { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; padding: 4px 10px; border: 1px solid var(--border); background: transparent; color: var(--bg); border-radius: 2px; cursor: pointer; transition: all 0.15s; opacity: 0.6; }
-  .rv-mode-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .rv-mode-btn.active { background: var(--accent); border-color: var(--accent); color: #000; opacity: 1; }
-  .rv-day-filter { display: flex; gap: 3px; }
-  .rv-day-btn { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; padding: 4px 7px; border: 1px solid var(--border); background: transparent; color: var(--bg); border-radius: 2px; cursor: pointer; transition: all 0.15s; opacity: 0.5; }
-  .rv-day-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .rv-day-btn.active { background: rgba(255,110,199,0.2); border-color: var(--accent); color: var(--accent); opacity: 1; }
 
-  /* metro line — 80% wide, centered; collapses when no route */
+  /* metro line — collapses when no route selected */
   #rv-metro-line { overflow-x: auto; overflow-y: visible; transition: padding 0.2s; }
   #rv-metro-line.no-route  { height: 0; padding: 0; overflow: hidden; }
-  #rv-metro-line.has-route { padding: 80px 15% 16px 5%; }
+  #rv-metro-line.has-route { padding: 80px 20% 16px 10%; }
   #rv-metro-line-inner { display: inline-flex; align-items: flex-end; min-width: 100%; }
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
-  .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: #0d1017; flex-shrink: 0; position: relative; z-index: 1; }
+  .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: var(--dark); flex-shrink: 0; position: relative; z-index: 1; }
   .rv-stop-node.highlighted .rv-stop-dot { background: var(--accent); border-color: var(--accent); transform: scale(1.4); }
   .rv-stop-label { font-size: 8px; color: var(--bg); opacity: 0.5; position: absolute; bottom: 14px; left: 50%; transform-origin: bottom left; transform: rotate(-45deg); white-space: nowrap; line-height: 1; pointer-events: none; }
   .rv-stop-node.highlighted .rv-stop-label { opacity: 1; color: var(--accent); }
   .rv-line-seg { height: 2px; min-width: 6px; flex: 1; opacity: 0.5; margin-bottom: 4px; }
 
-  /* Fig 2 heatmap */
-  #rv-heatmap { padding: 20px 24px 24px; }
-  .rv-heatmap-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
-  .rv-heatmap-title { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.5; }
+  /* Fig 2 heatmap table */
+  .hm-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+  .hm-title { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.5; font-family: 'DM Mono', monospace; }
   #rv-heatmap-grid { overflow-x: auto; }
   .rv-hm-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
   .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.4; text-align: center; padding: 0 0 6px; font-weight: 400; }
-  .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; font-size: 8px; width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rv-hm-table td { padding: 1px; }
-  .rv-hm-table td.rv-hm-row-label { padding-right: 8px; width: 180px; }
   .rv-hm-cell { width: 100%; height: 16px; border-radius: 2px; cursor: default; display: block; transition: opacity 0.1s; }
   .rv-hm-cell:hover { opacity: 0.8; outline: 1px solid rgba(255,255,255,0.3); }
   .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 180px; overflow: hidden; text-overflow: ellipsis; }
-  #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.4; }
-
-  /* Fig 2 inline legend */
-  .rv-legend-strip { display: flex; align-items: center; gap: 6px; }
-  .rv-legend-strip-label { font-family: 'DM Mono', monospace;  text-transform: uppercase;font-size: 9px; color: var(--bg); opacity: 0.5; white-space: nowrap; }
-  .rv-swatch-row { display: flex; gap: 2px; }
-  .rv-swatch { width: 16px; height: 10px; border-radius: 2px; }
-  /* heatmap tooltip */
-  #hm-tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; pointer-events: none; opacity: 0; z-index: 2000; transition: opacity 0.1s; white-space: nowrap; }
+  #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.4; font-family: 'DM Mono', monospace; }
 
   /* ══════════════════════════════════════
      FIG 3 — Average Delay Heatmap
   ══════════════════════════════════════ */
-  .fig3-dark { background: #0d1017; }
-  #fig3-controls { padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }
-  .fig3-ctrl-label { font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--bg); opacity: 0.45; white-space: nowrap; }
-  #fig3-route-select { font-family: 'DM Mono', monospace; font-size: 10px; background: #1a1f2e; border: 1px solid var(--border); color: var(--bg); padding: 4px 8px; border-radius: 3px; cursor: pointer; }
+  #fig3-route-select { font-family: 'DM Mono', monospace; font-size: 10px; background: var(--dark2); border: 1px solid var(--border); color: var(--bg); padding: 4px 8px; border-radius: 3px; cursor: pointer; }
   #fig3-route-select:focus { outline: none; border-color: var(--accent); }
-  .fig3-legend-wrap { display: flex; align-items: center; gap: 6px; margin-left: auto; }
-  .fig3-legend-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.45; white-space: nowrap; }
-  .fig3-swatch-row { display: flex; gap: 2px; }
-  .fig3-swatch { width: 16px; height: 10px; border-radius: 2px; }
-  #fig3-wrap { padding: 20px 24px 28px; overflow-x: auto; }
   #heatmap-svg-wrap svg .tick text { fill: rgba(245,240,232,0.45); font-size: 9px; font-family: 'DM Mono', monospace; }
   #heatmap-svg-wrap svg .domain { display: none; }
   #heatmap-svg-wrap svg .tick line { display: none; }
-  #fig3-tooltip { position: fixed; background: rgba(11,14,20,0.97); border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #fff; pointer-events: none; opacity: 0; z-index: 2000; transition: opacity 0.1s; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -177,22 +171,22 @@
   <!-- ── Fig 1: Scheduled Arrivals Map ─────────────────────────────── -->
   <div class="viz-block">
     <div class="viz-shell">
-      <div id="controls">
+      <div class="ctrl-bar ctrl-bar--gap32">
         <div class="ctrl-group">
-          <span class="control-label">Day</span>
-          <div id="day-selector">
-            <button class="day-btn" data-day="0">Mon</button>
-            <button class="day-btn" data-day="1">Tue</button>
-            <button class="day-btn" data-day="2">Wed</button>
-            <button class="day-btn" data-day="3">Thu</button>
-            <button class="day-btn" data-day="4">Fri</button>
-            <button class="day-btn" data-day="5">Sat</button>
-            <button class="day-btn" data-day="6">Sun</button>
+          <span class="mono-label mono-label--bright">Day</span>
+          <div id="day-selector" style="display:flex;gap:3px">
+            <button class="pill-btn" data-day="0">Mon</button>
+            <button class="pill-btn" data-day="1">Tue</button>
+            <button class="pill-btn" data-day="2">Wed</button>
+            <button class="pill-btn" data-day="3">Thu</button>
+            <button class="pill-btn" data-day="4">Fri</button>
+            <button class="pill-btn" data-day="5">Sat</button>
+            <button class="pill-btn" data-day="6">Sun</button>
           </div>
         </div>
         <div class="ctrl-divider"></div>
         <div class="ctrl-group">
-          <span class="control-label">Time</span>
+          <span class="mono-label mono-label--bright">Time</span>
           <div id="time-display">--:--</div>
           <div class="slider-wrap">
             <span class="slider-edge">00:00</span>
@@ -228,7 +222,7 @@
 
   <!-- ── Fig 2: Route Lateness Picker ──────────────────────────────── -->
   <div id="route-viz-block" class="viz-block">
-    <div class="route-viz-shell">
+    <div class="viz-shell viz-shell--dark">
       <div id="rv-header">
         <div id="rv-header-top">
           <select id="rv-route-select"><option value="">— select a route —</option></select>
@@ -239,30 +233,30 @@
             </div>
             <div id="rv-picker-dropdown"></div>
           </div>
-          <div id="rv-mode-all" class="rv-day-mode">
-            <button class="rv-mode-btn active" data-mode="all">All Days</button>
-            <button class="rv-mode-btn" data-mode="one">Single Day</button>
+          <div style="display:flex;gap:4px">
+            <button class="pill-btn pill-btn--mode active" data-mode="all">All Days</button>
+            <button class="pill-btn pill-btn--mode" data-mode="one">Single Day</button>
           </div>
-          <div class="rv-day-filter" id="rv-day-filter">
-            <button class="rv-day-btn active" data-day="0">Mon</button>
-            <button class="rv-day-btn" data-day="1">Tue</button>
-            <button class="rv-day-btn" data-day="2">Wed</button>
-            <button class="rv-day-btn" data-day="3">Thu</button>
-            <button class="rv-day-btn" data-day="4">Fri</button>
-            <button class="rv-day-btn" data-day="5">Sat</button>
-            <button class="rv-day-btn" data-day="6">Sun</button>
+          <div id="rv-day-filter" style="display:flex;gap:3px">
+            <button class="pill-btn pill-btn--sm active" data-day="0">Mon</button>
+            <button class="pill-btn pill-btn--sm" data-day="1">Tue</button>
+            <button class="pill-btn pill-btn--sm" data-day="2">Wed</button>
+            <button class="pill-btn pill-btn--sm" data-day="3">Thu</button>
+            <button class="pill-btn pill-btn--sm" data-day="4">Fri</button>
+            <button class="pill-btn pill-btn--sm" data-day="5">Sat</button>
+            <button class="pill-btn pill-btn--sm" data-day="6">Sun</button>
           </div>
         </div>
         <div id="rv-metro-line" class="no-route"><div id="rv-metro-line-inner"></div></div>
       </div>
 
-      <div id="rv-heatmap">
-        <div class="rv-heatmap-header">
-          <span class="rv-heatmap-title">Average Arrival Delays</span>
-          <div class="rv-legend-strip" id="rv-legend-strip" style="display:none">
-            <span class="rv-legend-strip-label">Early</span>
-            <div class="rv-swatch-row" id="rv-legend-swatches"></div>
-            <span class="rv-legend-strip-label">Late</span>
+      <div class="viz-pad">
+        <div class="hm-header">
+          <span class="hm-title">Average Arrival Delays</span>
+          <div class="swatch-strip" id="rv-legend-strip" style="display:none">
+            <span class="swatch-strip-label">Early</span>
+            <div class="swatch-row" id="rv-legend-swatches"></div>
+            <span class="swatch-strip-label">Late</span>
           </div>
         </div>
         <div id="rv-heatmap-grid"><div id="rv-no-data">Select a route above to explore delay patterns.</div></div>
@@ -279,17 +273,17 @@
 
   <!-- ── Fig 3: Average Delay Heatmap ──────────────────────────────── -->
   <div class="viz-block">
-    <div class="viz-shell fig3-dark">
-      <div id="fig3-controls">
-        <span class="fig3-ctrl-label">Route</span>
+    <div class="viz-shell viz-shell--dark">
+      <div class="ctrl-bar">
+        <span class="mono-label mono-label--bright">Route</span>
         <select id="fig3-route-select"><option value="0">All routes</option></select>
-        <div class="fig3-legend-wrap">
-          <span class="fig3-legend-label">Least late</span>
-          <div class="fig3-swatch-row" id="fig3-swatches"></div>
-          <span class="fig3-legend-label">Most late</span>
+        <div class="swatch-strip" style="margin-left:auto">
+          <span class="swatch-strip-label">Least late</span>
+          <div class="swatch-row" id="fig3-swatches"></div>
+          <span class="swatch-strip-label">Most late</span>
         </div>
       </div>
-      <div id="fig3-wrap">
+      <div class="viz-pad">
         <div id="heatmap-svg-wrap"></div>
       </div>
     </div>
@@ -304,8 +298,8 @@
   <div class="tt-routes" id="tt-routes"></div>
   <div class="tt-times" id="tt-times"></div>
 </div>
-<div id="hm-tooltip"></div>
-<div id="fig3-tooltip"></div>
+<div id="hm-tooltip" class="float-tooltip"></div>
+<div id="fig3-tooltip" class="float-tooltip"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
@@ -330,7 +324,32 @@ function timeStrToMinutes(t) {
 }
 function formatDelay(sec) {
   const abs = Math.abs(sec);
-  return `${String(Math.floor(abs / 60)).padStart(2,'0')}:${String(Math.floor(abs % 60)).padStart(2,'0')}`;
+  return `${String(Math.floor(abs/60)).padStart(2,'0')}:${String(Math.floor(abs%60)).padStart(2,'0')}`;
+}
+
+// Shared blue→neutral→pink color ramp used by Fig 2 and Fig 3
+function heatColor(t) {
+  if (t < 0.5) {
+    const a = (0.15 + (0.5 - t) * 2 * 0.75).toFixed(2);
+    return `rgba(135,206,250,${a})`;
+  } else if (t === 0.5) {
+    return 'rgba(255,255,255,0.06)';
+  } else {
+    const a = (0.15 + (t - 0.5) * 2 * 0.75).toFixed(2);
+    return `rgba(255,110,199,${a})`;
+  }
+}
+
+// Build a swatch strip into a container element (used by Fig 2 and Fig 3)
+function buildSwatchStrip(containerId, steps) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  for (let i = 0; i < steps; i++) {
+    const sw = document.createElement('div');
+    sw.className = 'swatch';
+    sw.style.background = heatColor(i / (steps - 1));
+    el.appendChild(sw);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -387,7 +406,7 @@ let selectedDay = _now.getDay() === 0 ? 6 : _now.getDay() - 1;
 const _nowMins = _now.getHours() * 60 + _now.getMinutes();
 let sliderVal = Math.round(_nowMins / 5);
 document.getElementById('time-slider').value = sliderVal;
-document.querySelector(`.day-btn[data-day="${selectedDay}"]`).classList.add('active');
+document.querySelector(`#day-selector .pill-btn[data-day="${selectedDay}"]`).classList.add('active');
 
 function sliderToMinutes(v) { return v * 5; }
 function getIncomingTimes(stop) {
@@ -503,9 +522,9 @@ const zoomBehavior = d3.zoom().scaleExtent([0.3,10])
   .on('zoom', (event) => { transform=event.transform; scheduleRender(); });
 d3.select('#map-container').call(zoomBehavior).call(zoomBehavior.transform, transform);
 
-document.querySelectorAll('.day-btn').forEach(btn => {
+document.querySelectorAll('#day-selector .pill-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('#day-selector .pill-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active'); selectedDay=parseInt(btn.dataset.day); scheduleRender();
   });
 });
@@ -546,17 +565,17 @@ let rvStopList=[], rvRoutesMeta={}, rvSelectedRouteId=null, rvMode='all', rvDay=
 document.getElementById('rv-day-filter').style.display='none';
 document.getElementById('rv-route-select').addEventListener('change', e=>setPickerRoute(e.target.value||null));
 
-document.querySelectorAll('.rv-mode-btn').forEach(btn => {
+document.querySelectorAll('.pill-btn--mode').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.rv-mode-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.pill-btn--mode').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active'); rvMode=btn.dataset.mode;
     document.getElementById('rv-day-filter').style.display=rvMode==='one'?'flex':'none';
     renderRouteViz();
   });
 });
-document.querySelectorAll('.rv-day-btn').forEach(btn => {
+document.querySelectorAll('.pill-btn--sm').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.rv-day-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.pill-btn--sm').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active'); rvDay=parseInt(btn.dataset.day); renderRouteViz();
   });
 });
@@ -655,27 +674,9 @@ function renderMetroLine(routeId) {
     const isHL=stop.id===rvHighlightedStop;
     const node=document.createElement('div');
     node.className='rv-stop-node'+(isHL?' highlighted':''); node.dataset.stopId=stop.id;
-    node.innerHTML=`<div class="rv-stop-label">${stop.name}</div><div class="rv-stop-dot" style="background:${isHL?lineColor:'#0d1017'};border-color:${lineColor}"></div>`;
+    node.innerHTML=`<div class="rv-stop-label">${stop.name}</div><div class="rv-stop-dot" style="background:${isHL?lineColor:'var(--dark)'};border-color:${lineColor}"></div>`;
     inner.appendChild(node);
   });
-}
-
-function buildRv2Legend(maxAbs) {
-  const strip=document.getElementById('rv-legend-strip');
-  const swatchEl=document.getElementById('rv-legend-swatches');
-  strip.style.display='flex';
-  swatchEl.innerHTML='';
-  const steps=13;
-  for (let i=0;i<steps;i++) {
-    const t=i/(steps-1); // 0=most early, 0.5=neutral, 1=most late
-    let bg;
-    if (t<0.5) { const a=(0.15+(0.5-t)*2*0.75).toFixed(2); bg=`rgba(135,206,250,${a})`; }
-    else if (t===0.5) { bg='rgba(255,255,255,0.06)'; }
-    else { const a=(0.15+(t-0.5)*2*0.75).toFixed(2); bg=`rgba(255,110,199,${a})`; }
-    const sw=document.createElement('div'); sw.className='rv-swatch'; sw.style.background=bg;
-    swatchEl.appendChild(sw);
-  }
-  const secs=Math.round(maxAbs), mm=Math.floor(secs/60), ss=secs%60;
 }
 
 function renderHeatmap(routeId) {
@@ -690,7 +691,9 @@ function renderHeatmap(routeId) {
   for (const {hours} of Object.values(data))
     for (const v of Object.values(hours))
       if (v!==null&&Math.abs(v)>maxAbs) maxAbs=Math.abs(v);
-  buildRv2Legend(maxAbs);
+
+  buildSwatchStrip('rv-legend-swatches', 13);
+  document.getElementById('rv-legend-strip').style.display='flex';
 
   const table=document.createElement('table'); table.className='rv-hm-table';
   const thead=document.createElement('thead'), headerRow=document.createElement('tr');
@@ -716,8 +719,8 @@ function renderHeatmap(routeId) {
       if (val===null) { cell.style.background='rgba(255,255,255,0.04)'; }
       else {
         const t=Math.min(Math.abs(val)/maxAbs,1);
-        cell.style.background=val<0?`rgba(135,206,250,${(0.15+t*0.75).toFixed(2)})`:
-                                    `rgba(255,110,199,${(0.15+t*0.75).toFixed(2)})`;
+        // early = blue side, late = pink side
+        cell.style.background = val < 0 ? heatColor(0.5 - t*0.5) : heatColor(0.5 + t*0.5);
         const sign=val<0?'Early':'Late';
         cell.addEventListener('mouseenter', e=>{
           const tip=document.getElementById('hm-tooltip');
@@ -764,28 +767,7 @@ loadLatenessData();
 // ═══════════════════════════════════════════════════════════════════════════
 // FIG 3 — AVERAGE DELAY HEATMAP
 // ═══════════════════════════════════════════════════════════════════════════
-
-// Build Fig 3 legend: blue -> neutral -> pink, 13 swatches
-(function() {
-  const wrap=document.getElementById('fig3-swatches');
-  const steps=13;
-  for (let i=0;i<steps;i++) {
-    const sw=document.createElement('div'); sw.className='fig3-swatch';
-    sw.style.background=fig3Color(i/(steps-1)); wrap.appendChild(sw);
-  }
-})();
-
-function fig3Color(t) {
-  if (t < 0.5) {
-    const a=(0.15+(0.5-t)*2*0.75).toFixed(2);
-    return `rgba(135,206,250,${a})`;
-  } else if (t === 0.5) {
-    return 'rgba(255,255,255,0.06)';
-  } else {
-    const a=(0.15+(t-0.5)*2*0.75).toFixed(2);
-    return `rgba(255,110,199,${a})`;
-  }
-}
+buildSwatchStrip('fig3-swatches', 13);
 
 const DAYS_LABEL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 const margin3={top:20, right:20, bottom:36, left:58};
@@ -794,9 +776,8 @@ function drawFig3(data) {
   const wrapEl=document.getElementById('heatmap-svg-wrap');
   wrapEl.innerHTML='';
   const myGroups=DAYS_LABEL;
-  const myVars=Array.from(new Set(data.map(d=>d.sched_arr_time_formatted)))
-                    .sort(d3.descending);
-  if (!myVars.length) {       
+  const myVars=Array.from(new Set(data.map(d=>d.sched_arr_time_formatted))).sort(d3.descending);
+  if (!myVars.length) {
     wrapEl.innerHTML='<p style="color:rgba(245,240,232,0.3);font-family:DM Mono,monospace;font-size:11px;padding:40px">No data for this route.</p>';
     return;
   }
@@ -813,15 +794,10 @@ function drawFig3(data) {
   const y3=d3.scaleBand().range([H3,0]).domain(myVars).padding(0.02);
 
   svg3.append('g').attr('transform',`translate(0,${H3})`).call(d3.axisBottom(x3).tickSize(0))
-    .selectAll('text')
-    .style('fill','rgba(245,240,232,0.5)')
-    .style('font-size','9px')
-    .style('font-family',"'DM Mono',monospace");
+    .selectAll('text').style('fill','rgba(245,240,232,0.5)').style('font-size','9px').style('font-family',"'DM Mono',monospace");
   svg3.append('g').call(d3.axisLeft(y3).tickSize(0))
     .selectAll('text')
-    .style('fill', 'rgba(245,240,232,0.4)')
-    .style('font-size', '8px')
-    .style('font-family', "'DM Mono',monospace")
+    .style('fill','rgba(245,240,232,0.4)').style('font-size','8px').style('font-family',"'DM Mono',monospace")
     .style('display', d => d.endsWith(':00') ? null : 'none');
 
   const minVal=d3.min(data,d=>+d.lateness_min)||0;
@@ -832,7 +808,7 @@ function drawFig3(data) {
   svg3.selectAll('rect').data(data).join('rect')
     .attr('x',d=>x3(d.weekday)).attr('y',d=>y3(d.sched_arr_time_formatted))
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
-    .style('fill',d=>fig3Color(Math.max(0,Math.min(1,(+d.lateness_min-minVal)/range3))))
+    .style('fill',d=>heatColor(Math.max(0,Math.min(1,(+d.lateness_min-minVal)/range3))))
     .style('opacity',0.85)
     .on('mouseover',function(event,d){
       d3.select(this).style('opacity',1).style('outline','1px solid rgba(255,255,255,0.35)');
@@ -856,7 +832,7 @@ d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
   const sel=document.getElementById('fig3-route-select'); sel.innerHTML='';
   for (const r of routes) {
     const opt=document.createElement('option'); opt.value=r;
-    opt.textContent=r=='0'?`All routes`:`Route ${r}`;
+    opt.textContent=r=='0'?'All routes':`Route ${r}`;
     sel.appendChild(opt);
   }
   drawFig3(fig3AllData.filter(d=>d.service_rte_num=='0'));
