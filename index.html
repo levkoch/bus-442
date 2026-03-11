@@ -121,11 +121,11 @@
   .rp-option { display: flex; align-items: center; gap: 8px; padding: 5px 10px; cursor: pointer; color: var(--bg); font-size: 11px; }
   .rp-option:hover { background: rgba(255,255,255,0.06); }
   .rp-option.selected { background: rgba(255,110,199,0.1); }
-  .rp-option .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; min-width: 28px; text-align: center; }
-  .rp-option .rp-desc { opacity: 0.5; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .rp-pill { font-size: 10px; font-weight: 500; color: #000; padding: 1px 6px; border-radius: 3px; white-space: nowrap; flex-shrink: 0; min-width: 28px; text-align: center; }
+  .rp-desc { opacity: 0.5; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
   /* metro line — collapses when no route selected */
-  #rv-metro-line { overflow-x: auto; overflow-y: visible; transition: padding 0.2s; }
+  #rv-metro-line { overflow-x: visible; overflow-y: visible; }
   #rv-metro-line.no-route  { height: 0; padding: 0; overflow: hidden; }
   #rv-metro-line.has-route { padding: 80px 10% 16px 5%; }
   #rv-metro-line-inner { display: inline-flex; align-items: flex-end; min-width: 100%; }
@@ -144,7 +144,7 @@
   .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.4; text-align: center; padding: 0 0 6px; font-weight: 400; }
   .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rv-hm-table td { padding: 1px; }
-  .rv-hm-table td:nth-child(2) { padding-left: 8px; }
+  .rv-hm-table td:first-child { padding-right: 8px; }
   .rv-hm-cell { width: 100%; height: 16px; border-radius: 2px; cursor: default; display: block; transition: opacity 0.1s; }
   .rv-hm-cell:hover { opacity: 0.8; outline: 1px solid rgba(255,255,255,0.3); }
   .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 180px; overflow: hidden; text-overflow: ellipsis; }
