@@ -298,7 +298,7 @@
         <div id="heatmap-svg-wrap"></div>
       </div>
     </div>
-    <div class="viz-caption">Fig. 3 — Average Delay (Minutes) by Time of Day &amp; Weekday</div>
+    <div class="viz-caption">Fig. 3 — Average Delay (Minutes) by Time &amp; Day</div>
   </div>
 
   <!-- sources -->
@@ -855,12 +855,14 @@ function drawFig3(data) {
   const x3=d3.scaleBand().range([0,containerW]).domain(myGroups).padding(0.04);
   const y3=d3.scaleBand().range([H3,0]).domain(myVars).padding(0.02);
 
+  // generate axes and then remove how they are rendered.
   svg3.append('g').attr('transform',`translate(0,${H3})`).call(d3.axisBottom(x3).tickSize(0))
     .selectAll('text').style('fill','rgba(245,240,232,0.5)').style('font-size','9px').style('font-family',"'DM Mono',monospace");
   svg3.append('g').call(d3.axisLeft(y3).tickSize(0))
     .selectAll('text')
     .style('fill','rgba(245,240,232,0.4)').style('font-size','8px').style('font-family',"'DM Mono',monospace")
     .style('display', d => d.endsWith(':00') ? null : 'none');
+  svg3.selectAll('.domain, .tick line').remove();
 
   const range3 = fig3GlobalMax - fig3GlobalMin || 1;
   const tip3=document.getElementById('fig3-tooltip');
@@ -891,6 +893,7 @@ fig3PickerTrigger.addEventListener('click', e=>{e.stopPropagation();fig3PickerDr
 document.addEventListener('click', ()=>fig3PickerDropdown.classList.remove('open'));
 
 d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
+  console.log([...new Set(raw.map(d=>d.service_rte_num))].slice(0,10));
   fig3AllData=raw;
   fig3GlobalMin=0;
   fig3GlobalMax=d3.max(raw,d=>+d.lateness_min)||1;
