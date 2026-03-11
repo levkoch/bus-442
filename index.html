@@ -829,7 +829,14 @@ function setFig3Route(rte, labelHTML) {
   document.querySelectorAll('#fig3-picker-dropdown .rp-option').forEach(el =>
     el.classList.toggle('selected', (el.dataset.rte||el.dataset.routeId) === rte));
   document.getElementById('fig3-picker-dropdown').classList.remove('open');
-  drawFig3(fig3AllData.filter(d => d.service_rte_num == rte));
+
+  // find the short name for this route ID and match against service_rte_num
+  const stop = rvStopList.find(s => s.routes[rte]);
+  const shortName = stop?.routes[rte]?.short_name;
+  const filtered = shortName
+    ? fig3AllData.filter(d => d.service_rte_num == shortName)
+    : rte == '0' ? fig3AllData : [];
+  drawFig3(filtered);
 }
 
 function drawFig3(data) {
