@@ -110,7 +110,7 @@
 
   /* metro line strip */
   #rv-metro-line { padding: 80px 24px 16px; overflow-x: auto; overflow-y: visible; }
-  #rv-metro-line-inner { display: inline-flex; align-items: flex-end; padding: 0 24px; min-width: 100%; }
+  #rv-metro-line-inner { display: inline-flex; align-items: flex-end; padding: 0 24px 0 0; min-width: 100%; }
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
   .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: #0d1017; flex-shrink: 0; position: relative; z-index: 1; }
   .rv-stop-node.highlighted .rv-stop-dot { background: var(--accent); border-color: var(--accent); transform: scale(1.4); }
@@ -134,12 +134,12 @@
   #rv-heatmap-grid { overflow-x: auto; }
   .rv-hm-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
   .rv-hm-table th { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.4; text-align: center; padding: 0 0 6px; font-weight: 400; }
-  .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; font-size: 8px; width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rv-hm-table th.rv-stop-th { text-align: right; padding-right: 8px; font-size: 8px; width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rv-hm-table td { padding: 1px; }
-  .rv-hm-table td.rv-hm-row-label { padding-right: 8px; width: 110px; }
+  .rv-hm-table td.rv-hm-row-label { padding-right: 8px; width: 180px; }
   .rv-hm-cell { width: 100%; height: 16px; border-radius: 2px; cursor: default; display: block; transition: opacity 0.1s; }
   .rv-hm-cell:hover { opacity: 0.8; outline: 1px solid rgba(255,255,255,0.3); }
-  .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 110px; overflow: hidden; text-overflow: ellipsis; }
+  .rv-hm-row-label { font-family: 'DM Mono', monospace; font-size: 8px; color: var(--bg); opacity: 0.5; text-align: right; padding-right: 8px; white-space: nowrap; width: 180px; overflow: hidden; text-overflow: ellipsis; }
   #rv-no-data { padding: 40px; text-align: center; font-size: 12px; color: var(--bg); opacity: 0.4; }
 
   /* heatmap tooltip */
@@ -767,9 +767,9 @@ function renderHeatmap(routeId) {
   cornerTh.className = 'rv-stop-th';
   cornerTh.textContent = 'Stop';
   headerRow.appendChild(cornerTh);
-  for (let h = 0; h < 24; h++) {
+  for (let h = 4; h < 24; h++) {
     const th = document.createElement('th');
-    th.textContent = h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h-12}p`;
+    th.textContent = h < 12 ? `${h}a` : h === 12 ? '12p' : `${h-12}p`;
     headerRow.appendChild(th);
   }
   thead.appendChild(headerRow);
@@ -785,7 +785,7 @@ function renderHeatmap(routeId) {
     row.appendChild(label);
 
     const { hours } = data[stop.id];
-    for (let h = 0; h < 24; h++) {
+    for (let h = 4; h < 24; h++) {
       const td = document.createElement('td');
       const cell = document.createElement('div');
       cell.className = 'rv-hm-cell';
