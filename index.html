@@ -45,14 +45,14 @@
   .pill-btn:hover { border-color: var(--accent); color: var(--accent); }
   .pill-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 500; }
   /* compact variant used in Fig 2 day/mode filters */
-  .pill-btn--sm { padding: 4px 7px; opacity: 0.5; }
+  .pill-btn--sm { padding: 4px 7px; }
   .pill-btn--sm.active { background: rgba(255,110,199,0.2); color: var(--accent); opacity: 1; }
-  .pill-btn--mode { padding: 4px 10px; letter-spacing: 1px; opacity: 0.6; }
+  .pill-btn--mode { padding: 4px 10px; letter-spacing: 1px; }
   .pill-btn--mode.active { background: var(--accent); border-color: var(--accent); color: #000; opacity: 1; }
 
   /* ── shared swatch strip (legend) ── */
   .swatch-strip { display: flex; align-items: center; gap: 6px; }
-  .swatch-strip-label { font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; color: var(--bg); opacity: 0.45; white-space: nowrap; }
+  .swatch-strip-label { font-family: 'DM Mono', monospace; font-size: 8px; text-transform: uppercase; color: var(--bg); opacity: 0.5; white-space: nowrap; }
   .swatch-row { display: flex; gap: 2px; }
   .swatch { width: 16px; height: 10px; border-radius: 2px; }
 
@@ -122,7 +122,7 @@
   /* metro line — collapses when no route selected */
   #rv-metro-line { overflow-x: auto; overflow-y: visible; transition: padding 0.2s; }
   #rv-metro-line.no-route  { height: 0; padding: 0; overflow: hidden; }
-  #rv-metro-line.has-route { padding: 80px 20% 16px 10%; }
+  #rv-metro-line.has-route { padding: 80px 20% 16px 5%; }
   #rv-metro-line-inner { display: inline-flex; align-items: flex-end; min-width: 100%; }
   .rv-stop-node { display: inline-flex; flex-direction: column; align-items: center; cursor: default; position: relative; }
   .rv-stop-dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--bg); background: var(--dark); flex-shrink: 0; position: relative; z-index: 1; }
@@ -214,7 +214,7 @@
 
   <div class="article-text">
     <div class="article-body">
-      <p>However, despite its best efforts, buses run late, and students are left stranded or late to class. We investigated the patterns to find which routes and times are more impacted by late buses. Some routes arrive consistently late or early, leading to discrepancies between posted and actual arrival times.</p>
+      <p>However, despite King County Metro's best efforts, buses run late, and students are left stranded or late to class. We investigated arrival patterns to find which routes and times are more often late. Some routes arrive consistently late or early, leading to discrepancies between posted and actual arrival times.</p>
       <hr class="section-rule">
       <p>The chart below lets you explore lateness by route. Select a route to see how delays are distributed across stops and hours of the day.</p>
     </div>
