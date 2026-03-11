@@ -864,16 +864,18 @@ function drawFig3(data) {
     .style('display', d => d.endsWith(':00') ? null : 'none');
   svg3.selectAll('.domain, .tick line').remove();
 
-  const range3 = fig3GlobalMax - fig3GlobalMin || 1;
   const tip3=document.getElementById('fig3-tooltip');
+  const absMax = Math.max(
+    Math.abs(d3.min(data, d => +d.lateness_min) || 0),
+    Math.abs(d3.max(data, d => +d.lateness_min) || 1)
+  );
 
   svg3.selectAll('rect').data(data).join('rect')
     .attr('x',d=>x3(d.weekday))
     .attr('y',d=>y3(d.sched_arr_time_formatted.slice(0,5)))
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
     .style('fill', d => {
-      const absMax = Math.max(Math.abs(fig3GlobalMin), fig3GlobalMax);
-      const t = (+d.lateness_min / absMax) * 0.5 + 0.5; 
+      const t = (+d.lateness_min / absMax) * 0.5 + 0.5;
       return heatColor(Math.max(0, Math.min(1, t)));
     })
     .style('opacity',0.85)
@@ -898,8 +900,6 @@ document.addEventListener('click', ()=>fig3PickerDropdown.classList.remove('open
 
 d3.csv('delays/FiveMinuteDelayAverageAcrossStop.csv').then(raw=>{
   fig3AllData=raw;
-  fig3GlobalMin = d3.min(raw, d => +d.lateness_min) || 0;
-  fig3GlobalMax = d3.max(raw, d => +d.lateness_min) || 1;
   drawFig3(raw.filter(d=>d.service_rte_num=='0'));
 }).catch(err=>{
   console.warn('Fig 3 data not available:',err);
