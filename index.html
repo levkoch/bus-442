@@ -863,7 +863,7 @@ function drawFig3(data) {
   const y3=d3.scaleBand().range([H3,0]).domain(myVars).padding(0.02);
 
   // generate axes and then remove how they are rendered.
-  svg3.append('g').attr('transform',`translate(0,${H3})`).call(d3.axisBottom(x3).tickSize(0))
+  svg3.append('g').attr('transform',`translate(0,${H3})`).call(d3.axisBottom(x3).tickSize(0)).attr('dy', '1.8em')
     .selectAll('text').style('fill','rgba(245,240,232,0.5)').style('font-size','9px').style('font-family',"'DM Mono',monospace");
   svg3.append('g').call(d3.axisLeft(y3).tickSize(0))
     .selectAll('text')
