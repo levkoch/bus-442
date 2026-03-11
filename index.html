@@ -238,7 +238,7 @@
           </div>
           <div style="display:flex;gap:4px">
             <button class="pill-btn pill-btn--mode active" data-mode="all">All Days</button>
-            <button class="pill-btn pill-btn--mode" data-mode="one">Single Day</button>
+            <button class="pill-btn pill-btn--mode" data-mode="one">Per Day</button>
           </div>
           <div id="rv-day-filter" style="display:flex;gap:3px">
             <button class="pill-btn pill-btn--sm active" data-day="0">Mon</button>
@@ -735,7 +735,7 @@ function renderHeatmap(routeId) {
         const sign=val<0?'Early':'Late';
         cell.addEventListener('mouseenter', e=>{
           const tip=document.getElementById('hm-tooltip');
-          tip.textContent=`${stop.name} · ${h}:00–${h+1}:00 · ${sign} ${formatDelay(val)}`;
+          tip.textContent=`${formatDelay(val)} ${sign} · ${stop.name} · ${h}:00–${h+1}:00`;
           tip.style.opacity=1; tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY-28)+'px';
         });
         cell.addEventListener('mouseleave', ()=>{document.getElementById('hm-tooltip').style.opacity=0;});
@@ -818,8 +818,8 @@ function drawFig3(data) {
   const tip3=document.getElementById('fig3-tooltip');
 
   svg3.selectAll('rect').data(data).join('rect')
+    .attr('x', d => x3(d.weekday))
     .attr('y', d => y3(d.sched_arr_time_formatted.slice(0, 5)))
-    .attr('x',d=>x3(d.weekday)).attr('y',d=>y3(d.sched_arr_time_formatted))
     .attr('width',x3.bandwidth()).attr('height',y3.bandwidth())
     .style('fill',d=>heatColor(Math.max(0,Math.min(1,(+d.lateness_min-minVal)/range3))))
     .style('opacity',0.85)
